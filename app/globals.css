@@ -1,0 +1,59 @@
+@import 'tailwindcss';
+
+.marquee {
+  animation: marquee 20s linear infinite;
+  will-change: transform;
+}
+
+.marquee2 {
+  animation: marquee2 25s linear infinite;
+  will-change: transform;
+}
+
+.group:hover .pause-on-hover {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee2 {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Light Scrollbar for Webkit Browsers (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #d6f0f8; /* same as your site background */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #9ccbe0; /* soft blue */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #7fb8d4;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #9ccbe0 #d6f0f8;
+}
