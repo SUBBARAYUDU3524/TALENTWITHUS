@@ -293,11 +293,6 @@ export default function HeroVideoSection() {
     []
   );
 
-  useEffect(() => {
-    const img = new window.Image();
-    img.src = '/image.jpg'; // prefetch
-  }, []);
-
   return (
     <section
       className={`relative min-h-screen flex flex-col items-center justify-center overflow-hidden`}
@@ -308,7 +303,7 @@ export default function HeroVideoSection() {
         <meta name="description" content={seoDesc} />
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDesc} />
-        <meta property="og:image" content="/image.jpg" />
+        <meta property="og:image" content="/assets/og-image.jpg" />
         <meta property="og:type" content="website" />
         <meta name="twitter:title" content={seoTitle} />
         <meta name="twitter:description" content={seoDesc} />

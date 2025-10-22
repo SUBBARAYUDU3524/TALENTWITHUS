@@ -264,7 +264,7 @@ export default function OnlineCompiler() {
             Judge0
           </a>.
           <br />
-          <b>Tip:</b> Enter input in "Standard Input" if your code expects it (e.g., via <code>input()</code> in Python).
+          <b>Tip:</b> Enter input in Standard Input if your code expects it (e.g., via <code>input()</code> in Python).
         </div>
       </div>
     </div>

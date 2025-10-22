@@ -3,6 +3,7 @@ import './globals.css';
 import Script from 'next/script';
 import LayoutWrapper from './components/LayoutWrapper';
 // import { ThemeProvider } from './context/ThemeContext';
+const adClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -88,7 +89,7 @@ export default function RootLayout({ children }) {
           ></Script> */}
         <Script
           async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9174140322510860"
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adClient}`}
           crossOrigin="anonymous"
         ></Script>
         <LayoutWrapper>{children}</LayoutWrapper>

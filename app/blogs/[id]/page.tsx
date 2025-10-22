@@ -1,7 +1,7 @@
 "use client";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { db } from "../../../FirebaseConfig";
 import {
   collection,
@@ -15,6 +15,7 @@ import {
   limit,
 } from "firebase/firestore";
 import { SlArrowRight } from "react-icons/sl";
+import Image from "next/image";
 
 // --- Utility: Format Firestore Timestamp or string to readable date
 function formatDate(dateInput: any) {
@@ -173,11 +174,13 @@ function renderBlock(block: any, idx: number) {
       );
     case "Image":
       return block.url ? (
-        <img
+        <Image
           key={idx}
           src={block.url}
-          alt={block.alt}
-          className="max-w-full rounded-xl shadow-lg my-6"
+          alt={block.alt || "Image"}
+          width={800} // provide approximate or known width
+          height={600} // provide approximate or known height
+          className="max-w-full rounded-xl shadow-lg my-6 object-cover"
         />
       ) : null;
     case "Link":
@@ -197,7 +200,8 @@ function renderBlock(block: any, idx: number) {
   }
 }
 
-export default function BlogPostPage({ params }: { params: { id: string } }) {
+export default function BlogPostPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = React.use(paramsPromise);
   const router = useRouter();
   const searchParams = useSearchParams();
   const blogParam = searchParams.get("blog");
@@ -306,8 +310,8 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
           query(collection(db, "blogs-testing"), orderBy("date", "desc"))
         );
         const trendingData = blogsSnapshot.docs
-          .map((doc) => ({ ...doc.data(), id: doc.id }))
-          .filter((p) => p.trending === true);
+          .map((doc) => ({ ...(doc.data() as any), id: doc.id }))
+          .filter((p: any) => p.trending === true);
         setTrendingPosts(trendingData);
       } catch {
         setTrendingPosts([]);
@@ -427,17 +431,17 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
           {/* Title */}
           <h1 className="text-xl sm:text-2xl font-extrabold mb-2 lg:text-4xl text-black">{post.title}</h1>
           {/* Summary */}
-         {post.summary && (
-  <p
-    className="text-lg text-gray-700 mb-4 font-medium break-words"
-    style={{ wordWrap: "break-word", overflowWrap: "break-word", maxWidth: "100%" }}
-  >
-    {post.summary}
-  </p>
-)}
+          {post.summary && (
+            <p
+              className="text-lg text-gray-700 mb-4 font-medium break-words"
+              style={{ wordWrap: "break-word", overflowWrap: "break-word", maxWidth: "100%" }}
+            >
+              {post.summary}
+            </p>
+          )}
           {/* Blog Image */}
           {post.image && (
-            <img
+            <Image
               src={post.image}
               alt={post.title}
               width={800}
@@ -447,7 +451,6 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
               loading="eager"
             />
           )}
-        
 
           {/* Render blog content blocks */}
           <div className="mb-12">
@@ -500,10 +503,12 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
                   ) : (
                     comments.map((comment) => (
                       <div key={comment.id} className="flex gap-4 transition">
-                        <img
+                        <Image
                           src={comment.avatar}
-                          alt={comment.name}
-                          className="w-12 h-12 rounded-full object-cover border-2 border-blue-400 transition"
+                          alt={comment.name || "User Avatar"}
+                          width={48} // corresponds to w-12
+                          height={48} // corresponds to h-12
+                          className="rounded-full object-cover border-2 border-blue-400 transition"
                         />
                         <div className="flex-1 bg-blue-50 rounded-2xl p-5 shadow-md border border-blue-100">
                           <div className="flex items-center justify-between mb-2">
@@ -557,7 +562,7 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
                     rel="noopener noreferrer"
                     className="flex flex-col gap-2 py-2 group "
                   >
-                    <img
+                    <Image
                       src={promo.image}
                       alt={promo.title || "Promotion"}
                       width={340}
@@ -578,7 +583,7 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
             </div>
           </div>
           {/* Recent Posts section */}
-          <div className="bg-blue-600  shadow-lg mb-8 border border-blue-200">
+          <div className="bg-blue-600 shadow-lg mb-8 border border-blue-200">
             <h2 className="text-white text-lg font-bold px-6 py-3 border-b border-blue-400">
               Recent Posts
             </h2>
@@ -597,8 +602,9 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
                     }}
                     className="flex items-center gap-2 py-2 group text-gray-900 hover:text-gray-950"
                   >
-                    <SlArrowRight className="text-black  text-base shrink-0" />
-                    <span className="truncate-2-lines group-hover:underline flex-1"
+                    <SlArrowRight className="text-black text-base shrink-0" />
+                    <span
+                      className="truncate-2-lines group-hover:underline flex-1"
                       style={{
                         display: "-webkit-box",
                         WebkitLineClamp: 2,
@@ -618,7 +624,7 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
             </div>
           </div>
           {/* Trending Posts section */}
-          <div className="bg-blue-600  shadow-lg mb-8 border border-blue-200">
+          <div className="bg-blue-600 shadow-lg mb-8 border border-blue-200">
             <h2 className="text-white text-lg font-bold px-6 py-3 border-b border-blue-400">
               Trending Posts
             </h2>
@@ -637,8 +643,9 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
                     }}
                     className="flex items-center gap-2 py-2 group text-gray-900 hover:text-gray-950"
                   >
-                    <SlArrowRight className="text-black  text-base shrink-0" />
-                    <span className="truncate-2-lines group-hover:underline flex-1"
+                    <SlArrowRight className="text-black text-base shrink-0" />
+                    <span
+                      className="truncate-2-lines group-hover:underline flex-1"
                       style={{
                         display: "-webkit-box",
                         WebkitLineClamp: 2,
