@@ -1,6 +1,6 @@
-
+import typography from "@tailwindcss/typography";
 const config = {
-  plugins: ["@tailwindcss/postcss","@tailwindcss/typography"],
+  plugins: ["@tailwindcss/postcss",typography],
 };
 
 export default config;
