@@ -14,13 +14,65 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
+// export const metadata = {
+//   title: {
+//     default: 'Talent With Us | Digital Innovation Experts',
+//     template: '%s | Talent With Us',
+//   },
+//   description:
+//     'Talent With Us connects skilled professionals and growing businesses through innovative digital solutions. We specialize in empowering talent, fostering remote opportunities, and helping organizations build exceptional teams worldwide.',
+// };
+
 export const metadata = {
+  // metadataBase is crucial! It sets the base URL for all relative URLs,
+  // like the one for your 'og:image'.
+  metadataBase: new URL('https://www.talentwithus.com'),
+
   title: {
-    default: 'Talent With Us | Digital Innovation Experts',
-    template: '%s | Talent With Us',
+    default: 'TALENTWITHUS - Connecting Talent with Opportunity', // Default title for homepage
+    template: '%s | TALENTWITHUS', // Template for all other pages (e.g., "About Us | TALENTWITHUS")
   },
   description:
-    'Talent With Us connects skilled professionals and growing businesses through innovative digital solutions. We specialize in empowering talent, fostering remote opportunities, and helping organizations build exceptional teams worldwide.',
+    'Talent With Us connects skilled professionals and growing businesses through innovative digital solutions. We specialize in empowering talent, fostering remote opportunities, and helping organizations build exceptional teams worldwide..',
+
+  // Open Graph (for Facebook, LinkedIn, etc.)
+  openGraph: {
+    title: 'TALENTWITHUS',
+    description:
+      'Talent With Us connects skilled professionals and growing businesses through innovative digital solutions. We specialize in empowering talent, fostering remote opportunities, and helping organizations build exceptional teams worldwide..',
+    url: 'https://www.talentwithus.com', // <-- !! REPLACE with your domain
+    siteName: 'TALENT WITH US',
+    // images: [
+    //   {
+    //     url: '/og-image.png', // Place this image in your 'public' folder
+    //     width: 1200,
+    //     height: 630,
+    //     alt: 'TALENTWITHUS Logo and Slogan',
+    //   },
+    // ],
+    locale: 'en_US',
+    type: 'website',
+  },
+
+  // Twitter Card
+  // twitter: {
+  //   card: 'summary_large_image',
+  //   title: 'TALENTWITHUS',
+  //   description: 'Your default site description...',
+  //   images: ['/og-image.png'], // Place this image in your 'public' folder
+  // },
+  robots: {
+    index: true,
+    follow: true,
+    nocache: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'maximum-video-preview': -1,
+      'maximum-image-preview': 'large',
+      'maximum-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({ children }) {
