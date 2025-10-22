@@ -5,7 +5,7 @@ import { SlArrowRight } from 'react-icons/sl';
 import { GrAnnounce } from 'react-icons/gr';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../../FirebaseConfig';
-
+import Image from "next/image";
 // --- Types ---
 interface BlogPost {
   id: string;
@@ -349,14 +349,15 @@ const BlogPosts: React.FC = () => {
                 aria-label={img.name || 'Promotion'}
                 tabIndex={0}
               >
-                <img
-                  src={img.image}
-                  alt={img.name || 'Promotion'}
-                  className="w-full h-80 object-cover"
-                  loading="lazy"
-                  width={320}
-                  height={160}
-                />
+                
+<Image
+  src={img.image}
+  alt={img.name || "Promotion"}
+  width={320}
+  height={160}
+  className="w-full h-80 object-cover"
+  loading="lazy"
+/>
               </a>
             ))}
           </aside>
