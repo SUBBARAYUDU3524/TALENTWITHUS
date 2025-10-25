@@ -29,19 +29,19 @@ export const metadata = {
   metadataBase: new URL('https://www.talentwithus.com'),
 
   title: {
-    default: 'TALENTWITHUS - Connecting Talent with Opportunity', // Default title for homepage
-    template: '%s | TALENTWITHUS', // Template for all other pages (e.g., "About Us | TALENTWITHUS")
+    default: 'Talent With Us | Connecting Talent with Opportunity', // Default title for homepage
+    template: '%s | Talent With Us', // Template for all other pages (e.g., "About Us | TALENTWITHUS")
   },
   description:
     'Talent With Us connects skilled professionals and growing businesses through innovative digital solutions. We specialize in empowering talent, fostering remote opportunities, and helping organizations build exceptional teams worldwide..',
 
   // Open Graph (for Facebook, LinkedIn, etc.)
   openGraph: {
-    title: 'TALENTWITHUS',
+    title: 'Talent With Us',
     description:
       'Talent With Us connects skilled professionals and growing businesses through innovative digital solutions. We specialize in empowering talent, fostering remote opportunities, and helping organizations build exceptional teams worldwide..',
     url: 'https://www.talentwithus.com', // <-- !! REPLACE with your domain
-    siteName: 'TALENT WITH US',
+    siteName: 'Talent With Us',
     // images: [
     //   {
     //     url: '/og-image.png', // Place this image in your 'public' folder

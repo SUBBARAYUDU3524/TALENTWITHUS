@@ -103,7 +103,7 @@ export default function Navbar() {
             animate={{ width: '100%', opacity: 1 }}
             exit={{ width: '100%', opacity: 0 }}
             transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
-            className="fixed top-0 left-0 h-1 bg-gradient-to-r from-[#0056D2] via-[#007BFF] to-[#00A8FF] z-[100]"
+            className="fixed top-0 left-0 h-1 bg-linear-to-r from-[#0056D2] via-[#007BFF] to-[#00A8FF] z-100"
             aria-label="Page loading indicator"
             role="status"
           />
@@ -132,10 +132,10 @@ export default function Navbar() {
             className="flex items-center ml-10 rounded-md"
           >
             <Image
-              src="/talent-with-us-logo copy.png"
+              src="/company-logo.svg"
               alt="Talent With Us Logo"
-              width={48}
-              height={48}
+              width={50}
+              height={50}
               className="object-cover"
               priority
             />
@@ -164,7 +164,7 @@ export default function Navbar() {
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              className="px-4 py-2 bg-gradient-to-r from-[#00AEEF] to-[#0052CC] text-white rounded-md font-medium text-sm shadow-lg transition-all cursor-pointer"
+              className="px-4 py-2 bg-linear-to-r from-[#00AEEF] to-[#0052CC] text-white rounded-md font-medium text-sm shadow-lg transition-all cursor-pointer"
               onClick={() => router.push('/contactUs')}
             >
               Book Consultation
@@ -178,7 +178,7 @@ export default function Navbar() {
                     aria-label="Go to dashboard"
                     className="flex items-center space-x-2 rounded-md cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    <div className="h-8 w-8 rounded-full hover:scale-110 transition-all bg-gradient-to-r from-[#00AEEF] to-[#0052CC] flex items-center justify-center text-white font-bold text-sm cursor-pointer select-none">
+                    <div className="h-8 w-8 rounded-full hover:scale-110 transition-all bg-linear-to-r from-[#00AEEF] to-[#0052CC] flex items-center justify-center text-white font-bold text-sm cursor-pointer select-none">
                       {user.displayName?.charAt(0) || 'U'}
                     </div>
                   </Link>
@@ -298,7 +298,7 @@ export default function Navbar() {
               <div className="mt-8">
                 <motion.button
                   whileTap={{ scale: 0.98 }}
-                  className="w-full rounded-md bg-gradient-to-r from-[#00AEEF] to-[#0052CC] py-3 px-6 text-white font-medium shadow-lg hover:shadow-primary/30 transition"
+                  className="w-full rounded-md bg-linear-to-r from-[#00AEEF] to-[#0052CC] py-3 px-6 text-white font-medium shadow-lg hover:shadow-primary/30 transition"
                   onClick={() => {
                     setIsOpen(false);
                     router.push('/contactUs');
