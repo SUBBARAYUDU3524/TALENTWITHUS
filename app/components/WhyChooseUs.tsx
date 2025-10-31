@@ -284,6 +284,7 @@ import {
 } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
 import { Card, CardContent, CardHeader, CardTitle } from './card';
+import Link from 'next/link';
 
 const features = [
   {
@@ -527,7 +528,9 @@ function WhyChooseUs() {
           transition={{ delay: 1.2 }}
           className="mt-10 text-center"
         >
-          <div className="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-[#1EB8F3] to-[#0059FF] rounded-full shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
+          <Link
+          href="/contactUs"
+          className="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-[#1EB8F3] to-[#0059FF] rounded-full shadow-lg hover:shadow-xl transition-shadow cursor-pointer" >
             Request Consultation
             <svg
               className="ml-2 w-5 h-5"
@@ -542,7 +545,7 @@ function WhyChooseUs() {
                 d="M14 5l7 7m0 0l-7 7m7-7H3"
               ></path>
             </svg>
-          </div>
+          </Link>
           <p className="mt-4 text-sm text-gray-500 ">
             Our consultants are available 24/7 to help you plan your next big move.
           </p>

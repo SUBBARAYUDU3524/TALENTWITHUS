@@ -170,35 +170,35 @@ const NAV_LINKS = [
   {
     heading: 'Company',
     links: [
+      { label: 'Home', href: '/' },
       { label: 'About', href: '/about' },
-      { label: 'Careers', href: '/careers' },
-      { label: 'Blog', href: '/blog' },
-      { label: 'Press', href: '/press' },
+      { label: 'Careers', href: '/career' },
+      { label: 'Blog', href: '/blogs' },
     ],
   },
   {
     heading: 'Solutions',
     links: [
-      { label: 'Services', href: '/services' },
+      { label: 'Services', href: '/whatwedo' },
       { label: 'Case Studies', href: '/case-studies' },
       { label: 'Industries', href: '/industries' },
       { label: 'Pricing', href: '/pricing' },
     ],
   },
   {
-    heading: 'Resources',
+    heading: 'Contact',
     links: [
-      { label: 'Documentation', href: '/docs' },
-      { label: 'Support', href: '/support' },
-      { label: 'API Reference', href: '/api' },
-      { label: 'Community', href: '/community' },
+      { label: 'info@talentwithus.com', href: 'mailto:support@talentwithus.com' },
+      { label: '+917799470104', href: 'tel:+917799470104' },
+      { label: 'Badvel, Kadapa (Dist.)', href: 'https://goo.gl/maps/someaddress' },
+      { label: 'Mon-Fri, 9AM - 6PM  ', href: '' },
     ],
   },
   {
     heading: 'Legal',
     links: [
-      { label: 'Privacy Policy', href: '/privacy' },
-      { label: 'Terms of Service', href: '/terms' },
+      { label: 'Privacy Policy', href: '/privacy-policy' },
+      { label: 'Terms of Service', href: '/terms-of-service' },
       { label: 'Security', href: '/security' },
       { label: 'Compliance', href: '/compliance' },
     ],
@@ -276,7 +276,7 @@ export default function Footer() {
           </div>
 
           {/* Navigation Columns */}
-          <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-10 text-center sm:text-left">
+          <div className="flex-1 grid grid-cols-3 sm:grid-cols-4 gap-10 text-center sm:text-left">
             {NAV_LINKS.map((col) => (
               <div key={col.heading}>
                 <h4 className="text-lg font-semibold text-gray-200 mb-5">
@@ -316,3 +316,4 @@ export default function Footer() {
     </footer>
   );
 }
+

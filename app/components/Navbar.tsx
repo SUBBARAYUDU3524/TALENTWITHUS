@@ -40,6 +40,8 @@ export default function Navbar() {
     return () => unsubscribe();
   }, []);
 
+  // console.log(user,"current user")
+
   // Shadow on scroll effect
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);

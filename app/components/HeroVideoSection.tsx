@@ -350,7 +350,7 @@ export default function HeroVideoSection() {
             Start Your Project
           </motion.a>
           <motion.a
-            href="/work"
+            href="/about"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.96 }}
             className={`px-8 py-3 rounded-full text-center text-lg ${buttonSecondary}`}

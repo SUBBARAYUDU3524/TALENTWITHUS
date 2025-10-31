@@ -2,7 +2,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
-import { db } from "../../../FirebaseConfig";
+import { auth, db } from "../../../FirebaseConfig";
 import {
   collection,
   getDoc,
@@ -16,6 +16,7 @@ import {
 } from "firebase/firestore";
 import { SlArrowRight } from "react-icons/sl";
 import Image from "next/image";
+import LoginModal from "../../components/LoginModal";
 
 // --- Utility: Format Firestore Timestamp or string to readable date
 function formatDate(dateInput: any) {
@@ -89,11 +90,6 @@ type Promotion = {
   url?: string;
   description?: string;
 };
-
-// --- Replace this with your actual authentication logic (NextAuth, Firebase Auth, etc.)
-function useCurrentUser(): User | null {
-  return null; // <--- Fix: implement your actual auth state here!
-}
 
 // --- Render a single content block
 function renderBlock(block: any, idx: number) {
@@ -205,7 +201,8 @@ export default function BlogPostPage({ params: paramsPromise }: { params: Promis
   const router = useRouter();
   const searchParams = useSearchParams();
   const blogParam = searchParams.get("blog");
-  const user = useCurrentUser();
+   const [user, setUser] = useState(null);
+ 
 
   const [post, setPost] = useState<any>(null);
   const [recentPosts, setRecentPosts] = useState<any[]>([]);
@@ -220,7 +217,16 @@ export default function BlogPostPage({ params: paramsPromise }: { params: Promis
 
   const [trendingPosts, setTrendingPosts] = useState<any[]>([]);
   const [trendingLoading, setTrendingLoading] = useState(true);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+  
   // --- Fetch blog post data from Firestore ---
   useEffect(() => {
     let unsub: (() => void) | null = null;
@@ -351,32 +357,66 @@ export default function BlogPostPage({ params: paramsPromise }: { params: Promis
     fetchComments();
   }, [post?.id]);
 
+function timeAgo(timestamp: any) {
+  if (!timestamp) return '';
+
+  let date: Date;
+  if (timestamp.seconds) {
+    date = new Date(timestamp.seconds * 1000);
+  } else if (timestamp.toDate) {
+    date = timestamp.toDate();
+  } else if (timestamp instanceof Date) {
+    date = timestamp;
+  } else return '';
+
+  const now = new Date();
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (seconds < 60) return 'just now';  // less than 1 min
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} min${minutes !== 1 ? 's' : ''} ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hr${hours !== 1 ? 's' : ''} ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} day${days !== 1 ? 's' : ''} ago`;
+}
+
+
+
   // --- Comment submission handler (require login) ---
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) {
-      alert("Please login to comment.");
-      return;
-    }
-    if (!newComment.trim() || !post?.id) return;
-    const newCommentObj = {
-      name: user.name,
-      avatar: user.avatar || `https://randomuser.me/api/portraits/men/1.jpg`,
-      date: "Just now",
-      comment: newComment,
-      createdAt: serverTimestamp(),
-    };
-    // Add to firestore
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!user) {
+    setIsLoginModalOpen(true); // Changed from setShowLoginModal to setIsLoginModalOpen
+    return;
+  }
+  if (!newComment.trim() || !post?.id) return;
+
+  const userName = user.name || 'Anonymous';
+  const userAvatar = user.avatar || 'https://randomuser.me/api/portraits/men/1.jpg';
+
+  const newCommentObj = {
+    name: userName,
+    avatar: userAvatar,
+    date: serverTimestamp(),
+    comment: newComment,
+    createdAt: serverTimestamp(),
+  };
+
+  // Add to firestore
+  try {
     const ref = await addDoc(
       collection(db, "blogs-testing", post.id, "comments"),
       newCommentObj
     );
-    setComments([
-      { ...newCommentObj, id: ref.id, date: "Just now" },
-      ...comments,
-    ]);
+    setComments([{ ...newCommentObj, id: ref.id, date: "Just now" }, ...comments]);
     setNewComment("");
-  };
+  } catch (error) {
+    console.error("Failed to add comment: ", error);
+  }
+};
+
+
 
   if (loading) {
     return (
@@ -402,8 +442,15 @@ export default function BlogPostPage({ params: paramsPromise }: { params: Promis
   }
 
   return (
+    
     <div className="bg-white min-h-screen text-black py-10 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8">
+          {isLoginModalOpen && (
+    <LoginModal
+      isOpen={isLoginModalOpen}
+      onClose={() => setIsLoginModalOpen(false)}
+    />
+  )}
         {/* Left Main Content */}
         <div className="w-full lg:w-2/3">
           {/* Back button */}
@@ -472,10 +519,16 @@ export default function BlogPostPage({ params: paramsPromise }: { params: Promis
                 >
                   <h3 className="text-lg font-medium mb-4 text-blue-700">Leave a comment</h3>
                   {!user && (
-                    <div className="mb-4 text-red-500 font-semibold">
-                      Please login to comment.
-                    </div>
-                  )}
+  <div className="mb-4">
+    <button
+      type="button"
+      className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-semibold"
+      onClick={() => setIsLoginModalOpen(true)} // Changed from setShowLoginModal to setIsLoginModalOpen
+    >
+      Login to comment
+    </button>
+  </div>
+)}
                   <textarea
                     id="comment"
                     rows={2}
@@ -515,9 +568,8 @@ export default function BlogPostPage({ params: paramsPromise }: { params: Promis
                             <h4 className="font-semibold text-black transition">
                               {comment.name}
                             </h4>
-                            <span className="text-xs text-gray-500 italic">
-                              {comment.date}
-                            </span>
+                            <span className="text-xs text-gray-500 italic">{timeAgo(comment.date)}</span>
+
                           </div>
                           <p className="text-gray-700 leading-relaxed">
                             {comment.comment}
