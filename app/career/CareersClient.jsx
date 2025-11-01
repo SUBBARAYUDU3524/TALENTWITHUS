@@ -146,27 +146,34 @@ import React from 'react';
 import OpenPositions from '../components/OpenPositions';
 import { useAuth } from '../context/AuthContext';
 import Link from 'next/link';
-import { FaHandsHelping, FaRocket, FaUserGraduate, FaGlobeAmericas } from 'react-icons/fa';
+import { 
+  FaHandsHelping, 
+  FaRocket, 
+  FaUserGraduate, 
+  FaGlobeAmericas,
+  FaBriefcase,
+  FaLock
+} from 'react-icons/fa';
 import HeroSection from '../components/careers/HeroSection';
 
 const culturePoints = [
   {
-    icon: <FaHandsHelping className="text-cyan-600 w-10 h-10" />,
+    icon: <FaHandsHelping className="text-blue-600 w-8 h-8" />,
     title: 'Collaboration',
     desc: 'We believe the best solutions come from working together.',
   },
   {
-    icon: <FaRocket className="text-cyan-600 w-10 h-10" />,
+    icon: <FaRocket className="text-blue-600 w-8 h-8" />,
     title: 'Innovation',
     desc: 'We encourage bold ideas and continuous improvement.',
   },
   {
-    icon: <FaUserGraduate className="text-cyan-600 w-10 h-10" />,
+    icon: <FaUserGraduate className="text-blue-600 w-8 h-8" />,
     title: 'Growth Mindset',
     desc: 'Personal and professional development is part of every role.',
   },
   {
-    icon: <FaGlobeAmericas className="text-cyan-600 w-10 h-10" />,
+    icon: <FaGlobeAmericas className="text-blue-600 w-8 h-8" />,
     title: 'Diversity & Inclusion',
     desc: 'We welcome team members from all backgrounds and experiences.',
   },
@@ -176,105 +183,132 @@ export default function CareersClient() {
   const { user, loading } = useAuth();
 
   return (
-    <section className="bg-gradient-to-br from-blue-50 to-white min-h-screen text-gray-900">
-      {/* Render Hero Section */}
+    <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen">
+      {/* Hero Section */}
       <HeroSection />
 
-      {/* Culture Cards */}
-      <div className="max-w-7xl mx-auto space-y-16 px-4 sm:px-6 lg:px-0 py-10">
-        <h2 className="text-4xl font-extrabold text-center mb-12 text-cyan-700">
-          🌟 Company Culture & Values
-        </h2>
-        <div className="grid md:grid-cols-4 sm:grid-cols-2 gap-6">
-          {culturePoints.map(({ icon, title, desc }) => (
-            <div
-              key={title}
-              className="bg-[#DEEAF3] rounded-xl p-7 border-2 border-cyan-400 shadow-lg flex flex-col items-center text-center hover:scale-[1.03] transition"
-              tabIndex={0}
-              role="region"
-              aria-label={title}
-            >
-              {icon}
-              <h3 className="text-xl font-semibold mt-4 text-cyan-600">{title}</h3>
-              <p className="text-gray-800 mt-2">{desc}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Open Positions Section */}
-        <div className="w-full py-16 bg-gradient-to-tr from-cyan-100 via-white to-blue-100 relative overflow-hidden rounded-3xl mt-16">
-          <div className="max-w-3xl mx-auto relative z-10 bg-white/50 backdrop-blur-xl rounded-3xl shadow-lg border border-cyan-300 p-10 md:p-16">
-            <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-center mb-8 text-cyan-700 flex items-center justify-center gap-3 drop-shadow-lg">
-              <span className="w-7 h-7 md:w-14 md:h-14 bg-cyan-500/30 text-xl md:text-3xl lg:text-4xl flex items-center justify-center rounded-full shadow-lg">💼</span>
-              Open Positions
+      {/* Culture & Values Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Our Culture & Values
             </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              We foster an environment where innovation thrives and every team member can grow.
+            </p>
+          </div>
 
-            {!loading && !user && (
-              <div className="mb-8 flex justify-center">
-                <div className="bg-white/80 backdrop-blur-md border border-cyan-100 px-7 py-5 rounded-2xl shadow-lg flex items-center gap-3 animate-fade-in">
-                  <span className="w-10 h-10 bg-cyan-200 text-cyan-700 rounded-full flex items-center justify-center text-2xl shadow">🔒</span>
-                  <p className="text-cyan-700 font-medium text-lg">
-                    You must{' '}
-                    <Link href="/login" className="underline text-cyan-700 hover:text-cyan-900 font-semibold transition drop-shadow">
-                      log in
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {culturePoints.map(({ icon, title, desc }) => (
+              <div
+                key={title}
+                className="bg-white rounded-xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:border-blue-300 group"
+              >
+                <div className="flex items-center justify-center w-12 h-12 bg-blue-50 rounded-lg mb-4 group-hover:bg-blue-100 transition-colors">
+                  {icon}
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  {title}
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Open Positions Section */}
+      <section className="py-16 ">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full">
+                <FaBriefcase className="w-6 h-6 text-blue-600" />
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+                Open Positions
+              </h2>
+            </div>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Explore current opportunities and find your perfect role in our growing team.
+            </p>
+          </div>
+
+          {/* Login Prompt */}
+          {/* {!loading &&  (
+            <div className="max-w-2xl mx-auto mb-8">
+              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 flex items-center gap-4">
+                <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full">
+                  <FaLock className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-blue-800 font-medium">
+                    You need to{' '}
+                    <Link
+                      href="/login"
+                      className="underline hover:text-blue-900 font-semibold transition-colors"
+                    >
+                      sign in
                     </Link>{' '}
-                    to apply for jobs.
+                    to apply for positions.
                   </p>
                 </div>
               </div>
-            )}
+            </div>
+          )} */}
 
-            <OpenPositions user={user} />
+          {/* Open Positions Component */}
+          <div className="max-w-6xl mx-auto">
+            <OpenPositions />
           </div>
         </div>
+      </section>
 
-        {/* Easy Apply Card */}
- <div className="flex justify-center py-16 bg-gradient-to-b from-[#F0FBFF] via-[#E8F5FF] to-white relative rounded-3xl overflow-hidden">
-  {/* Soft Gradient Glows */}
-  <div className="absolute left-10 top-20 w-72 h-72 bg-[#1EB8F3]/20 rounded-full blur-3xl"></div>
-  <div className="absolute right-10 bottom-10 w-64 h-64 bg-[#0059FF]/20 rounded-full blur-3xl"></div>
+      {/* Quick Apply Section */}
+      <section className="py-16 bg-gradient-to-br">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 md:p-12 text-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="text-2xl text-white">📩</span>
+            </div>
+            
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+              Don't See the Perfect Role?
+            </h2>
+            
+            <p className="text-lg text-gray-600 mb-8 leading-relaxed max-w-2xl mx-auto">
+              We're always looking for talented individuals who share our passion for innovation. 
+              Send us your resume and tell us how you can contribute to our team.
+            </p>
 
-  {/* Card Content */}
-  <div className="relative z-10 bg-white/80 backdrop-blur-lg rounded-3xl border border-cyan-100 shadow-2xl p-10 md:p-14 w-full max-w-2xl flex flex-col items-center text-center transition-transform duration-500 hover:scale-[1.02]">
-    {/* Icon */}
-    <div className="w-14 h-14 flex items-center justify-center rounded-full bg-gradient-to-br from-[#1EB8F3]/20 to-[#0059FF]/20 text-4xl text-[#00AEEF] shadow-lg mb-6">
-      📩
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <a
+                href="mailto:careers@talentwithus.com?subject=Open Application&body=Hi Team, I'm interested in exploring opportunities with Talent With Us. Here's a brief about myself..."
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+              >
+                Send Open Application
+              </a>
+              
+              <div className="text-sm text-gray-500">
+                or email directly to{' '}
+                <a
+                  href="mailto:careers@talentwithus.com"
+                  className="text-blue-600 hover:text-blue-700 font-medium underline"
+                >
+                  careers@talentwithus.com
+                </a>
+              </div>
+            </div>
+
+            <div className="mt-6 text-sm text-gray-500">
+              We typically respond within 2-3 business days
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
-
-    {/* Title */}
-    <h2 className="text-3xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-[#1EB8F3] via-[#00AEEF] to-[#0059FF] drop-shadow-sm">
-      Quick Apply
-    </h2>
-
-    {/* Description */}
-    <p className="text-gray-700 text-lg md:text-xl leading-relaxed mb-8 px-4">
-      Can’t find a role that fits you? Don’t worry — we’re always open to meeting 
-      passionate, talented individuals who want to make a difference. 
-      Send us your resume and let’s explore opportunities together!
-    </p>
-
-    {/* Button */}
-    <a
-      href="mailto:careers@talentwithus.com?subject=Open Application"
-      className="px-10 py-4 text-lg font-semibold text-white rounded-full shadow-lg bg-gradient-to-r from-[#00AEEF] to-[#0059FF] hover:shadow-2xl hover:scale-105 transition-transform duration-300"
-    >
-      Apply Now
-    </a>
-
-    {/* Email Text */}
-    <div className="mt-6 text-sm text-cyan-700 font-medium">
-      Or email us directly at{' '}
-      <a
-        href="mailto:careers@talentwithus.com"
-        className="underline hover:text-[#00AEEF] transition-colors duration-300"
-      >
-        careers@talentwithus.com
-      </a>
-    </div>
-  </div>
-</div>
-
-      </div>
-    </section>
   );
 }

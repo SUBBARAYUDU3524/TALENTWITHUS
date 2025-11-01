@@ -184,6 +184,7 @@ import {
   SiMysql,
   SiPostgresql,
 } from 'react-icons/si';
+import Link from 'next/link';
 
 // Professional color mapping for icons
 const iconColorMap = {
@@ -331,6 +332,7 @@ const TechStackShowcase = () => {
       <MarqueeRow icons={techIconsRowTwo} isAlt />
 
       <div className="text-center mt-12 mb-10">
+        <Link href="/whatwedo" passHref>
         <motion.button
           whileHover={{
             scale: 1.06,
@@ -342,6 +344,7 @@ const TechStackShowcase = () => {
         >
           Explore Our Full Repository
         </motion.button>
+        </Link>
       </div>
     </section>
   );

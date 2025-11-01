@@ -278,13 +278,15 @@
 import React, { useRef, useState } from 'react';
 import { FiMail, FiSend, FiPhone, FiMapPin } from 'react-icons/fi';
 import Image from 'next/image';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../../FirebaseConfig';
 
 const initialForm = {
   name: '',
   email: '',
   subject: '',
   message: '',
-  company: '',
+  company: '', // Honeypot field
 };
 
 export default function ContactClient() {
@@ -293,38 +295,95 @@ export default function ContactClient() {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
 
-  const validate = () =>
-    form.name.trim() &&
-    /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email) &&
-    form.subject.trim() &&
-    form.message.trim();
+  const validateForm = () => {
+    const errors = {};
+    
+    // Name validation
+    if (!form.name.trim()) {
+      errors.name = 'Full name is required';
+    } else if (form.name.trim().length < 2) {
+      errors.name = 'Name must be at least 2 characters long';
+    }
+
+    // Email validation
+    if (!form.email.trim()) {
+      errors.email = 'Email address is required';
+    } else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+
+    // Subject validation
+    if (!form.subject.trim()) {
+      errors.subject = 'Subject is required';
+    } else if (form.subject.trim().length < 5) {
+      errors.subject = 'Subject must be at least 5 characters long';
+    }
+
+    // Message validation
+    if (!form.message.trim()) {
+      errors.message = 'Message is required';
+    } else if (form.message.trim().length < 10) {
+      errors.message = 'Message must be at least 10 characters long';
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    
+    // Clear field error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
 
-    if (!validate()) {
-      setError('Please fill in all fields with valid information.');
-      return;
-    }
+    // Honeypot validation
     if (form.company.length > 0) {
       setError('Submission failed. Please try again.');
       return;
     }
 
+    // Form validation
+    if (!validateForm()) {
+      setError('Please review your entries and try again.');
+      return;
+    }
+
     setSending(true);
+
     try {
-      await new Promise((res) => setTimeout(res, 1350)); // change to actual submit!
+      // Save to Firebase Firestore
+      await addDoc(collection(db, 'contactSubmissions'), {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        subject: form.subject.trim(),
+        message: form.message.trim(),
+        submittedAt: serverTimestamp(),
+        status: 'new',
+        source: 'website_contact_form'
+      });
+
+      // Success
       setSent(true);
       setForm(initialForm);
+      setFieldErrors({});
       if (formRef.current) formRef.current.reset();
-    } catch {
-      setError('Something went wrong. Please try again.');
+      
+    } catch (error) {
+      console.error('Error saving contact form:', error);
+      setError('Something went wrong while sending your message. Please try again or email us directly.');
     } finally {
       setSending(false);
     }
@@ -420,8 +479,8 @@ export default function ContactClient() {
             </h2>
 
             {sent ? (
-              <div className="text-green-600 font-bold text-lg py-6 text-center">
-                Thank you for reaching out! We’ll get back to you soon.
+              <div className="text-green-600 font-bold text-lg py-6 text-center bg-green-50 rounded-lg border border-green-200">
+                ✅ Thank you for reaching out! We'll get back to you within 24 hours.
               </div>
             ) : (
               <form
@@ -430,13 +489,17 @@ export default function ContactClient() {
                 onSubmit={handleSubmit}
                 noValidate
               >
+                {/* Honeypot field - hidden from users */}
                 <input
                   type="text"
                   name="company"
                   className="hidden"
                   value={form.company}
                   onChange={handleChange}
+                  tabIndex="-1"
+                  autoComplete="off"
                 />
+                
                 <div>
                   <label
                     htmlFor="name"
@@ -448,12 +511,19 @@ export default function ContactClient() {
                     id="name"
                     name="name"
                     type="text"
-                    className="w-full px-4 py-3 bg-slate-50 rounded-lg text-gray-900 border border-slate-200 focus:ring-2 focus:ring-[#1EB8F3]"
-                    placeholder="Enter your name"
+                    className={`w-full px-4 py-3 bg-slate-50 rounded-lg text-gray-900 border ${
+                      fieldErrors.name ? 'border-red-300 focus:ring-2 focus:ring-red-300' : 'border-slate-200 focus:ring-2 focus:ring-[#1EB8F3]'
+                    }`}
+                    placeholder="Enter your full name"
                     onChange={handleChange}
                     value={form.name}
+                    required
                   />
+                  {fieldErrors.name && (
+                    <p className="text-red-500 text-sm mt-1">{fieldErrors.name}</p>
+                  )}
                 </div>
+                
                 <div>
                   <label
                     htmlFor="email"
@@ -465,12 +535,19 @@ export default function ContactClient() {
                     id="email"
                     name="email"
                     type="email"
-                    className="w-full px-4 py-3 bg-slate-50 rounded-lg text-gray-900 border border-slate-200 focus:ring-2 focus:ring-[#1EB8F3]"
-                    placeholder="Enter your email"
+                    className={`w-full px-4 py-3 bg-slate-50 rounded-lg text-gray-900 border ${
+                      fieldErrors.email ? 'border-red-300 focus:ring-2 focus:ring-red-300' : 'border-slate-200 focus:ring-2 focus:ring-[#1EB8F3]'
+                    }`}
+                    placeholder="Enter your email address"
                     onChange={handleChange}
                     value={form.email}
+                    required
                   />
+                  {fieldErrors.email && (
+                    <p className="text-red-500 text-sm mt-1">{fieldErrors.email}</p>
+                  )}
                 </div>
+                
                 <div>
                   <label
                     htmlFor="subject"
@@ -482,12 +559,19 @@ export default function ContactClient() {
                     id="subject"
                     name="subject"
                     type="text"
-                    className="w-full px-4 py-3 bg-slate-50 rounded-lg text-gray-900 border border-slate-200 focus:ring-2 focus:ring-[#1EB8F3]"
+                    className={`w-full px-4 py-3 bg-slate-50 rounded-lg text-gray-900 border ${
+                      fieldErrors.subject ? 'border-red-300 focus:ring-2 focus:ring-red-300' : 'border-slate-200 focus:ring-2 focus:ring-[#1EB8F3]'
+                    }`}
                     placeholder="What's this about?"
                     onChange={handleChange}
                     value={form.subject}
+                    required
                   />
+                  {fieldErrors.subject && (
+                    <p className="text-red-500 text-sm mt-1">{fieldErrors.subject}</p>
+                  )}
                 </div>
+                
                 <div>
                   <label
                     htmlFor="message"
@@ -499,17 +583,25 @@ export default function ContactClient() {
                     id="message"
                     name="message"
                     rows={5}
-                    className="w-full px-4 py-3 bg-slate-50 rounded-lg text-gray-900 border border-slate-200 focus:ring-2 focus:ring-[#1EB8F3]"
-                    placeholder="Tell us about your project..."
+                    className={`w-full px-4 py-3 bg-slate-50 rounded-lg text-gray-900 border ${
+                      fieldErrors.message ? 'border-red-300 focus:ring-2 focus:ring-red-300' : 'border-slate-200 focus:ring-2 focus:ring-[#1EB8F3]'
+                    }`}
+                    placeholder="Tell us about your project, requirements, or any questions you have..."
                     onChange={handleChange}
                     value={form.message}
+                    required
                   />
+                  {fieldErrors.message && (
+                    <p className="text-red-500 text-sm mt-1">{fieldErrors.message}</p>
+                  )}
                 </div>
+                
                 {error && (
-                  <div className="text-red-500 font-medium text-sm">
+                  <div className="text-red-500 font-medium text-sm bg-red-50 p-3 rounded-lg border border-red-200">
                     {error}
                   </div>
                 )}
+                
                 <button
                   type="submit"
                   disabled={sending}
@@ -518,7 +610,10 @@ export default function ContactClient() {
                   }`}
                 >
                   {sending ? (
-                    'Sending...'
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Sending...
+                    </>
                   ) : (
                     <>
                       Send Message <FiSend className="ml-3" />
