@@ -1,16 +1,19 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import { addDoc, collection, query, where, onSnapshot } from "firebase/firestore";
-import { db } from"../../FirebaseConfig";
+import { db } from "../../FirebaseConfig";
 
 type Slot = { date: string; time: string };
 
 const generateSlots = (): Slot[] => {
-  // For demo, generate slots for today 10am-5pm every hour
   const date = new Date();
   const ymd = date.toISOString().slice(0, 10);
-  return Array.from({ length: 8 }, (_, i) => ({
+
+  const hours = [10, 11, 12, 13, 14, 15, 16, 17];
+  return hours.map(h => ({
     date: ymd,
-    time: `${String(10 + i).padStart(2, "0")}:00`,
+    time: `${String(h).padStart(2, "0")}:00`,
   }));
 };
 
@@ -20,17 +23,26 @@ export default function ScheduleCallModal({ onClose }: { onClose: () => void }) 
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [bookedSlots, setBookedSlots] = useState<Slot[]>([]);
+  const [error, setError] = useState("");
 
-  // Real-time booked slots listener
+  // ✅ Listen to real-time booked slots
   useEffect(() => {
     const today = new Date().toISOString().slice(0, 10);
     const q = query(collection(db, "calls"), where("date", "==", today));
-    const unsub = onSnapshot(q, snap => {
-      setBookedSlots(snap.docs.map(doc => ({
-        date: doc.data().date,
-        time: doc.data().time,
-      })));
-    });
+
+    const unsub = onSnapshot(
+      q,
+      snap => {
+        setBookedSlots(
+          snap.docs.map(doc => ({
+            date: doc.data().date,
+            time: doc.data().time,
+          }))
+        );
+      },
+      err => console.error("Firestore Error", err)
+    );
+
     return unsub;
   }, []);
 
@@ -38,8 +50,15 @@ export default function ScheduleCallModal({ onClose }: { onClose: () => void }) 
     slot => !bookedSlots.some(b => b.date === slot.date && b.time === slot.time)
   );
 
+  // ✅ Book slot
   const bookSlot = async () => {
-    if (!selected || !email) return;
+    setError("");
+
+    if (!selected || !email) {
+      setError("Please fill all details");
+      return;
+    }
+
     setLoading(true);
     try {
       await addDoc(collection(db, "calls"), {
@@ -50,52 +69,93 @@ export default function ScheduleCallModal({ onClose }: { onClose: () => void }) 
         status: "pending",
       });
       setDone(true);
-    } catch {
-      alert("Booking failed. Try again.");
+    } catch (err: any) {
+      console.error(err);
+      setError("Booking failed due to Firestore permissions.");
     }
     setLoading(false);
   };
 
+  // ✅ SUCCESS SCREEN
   if (done)
     return (
-      <div className="p-6 text-center">
-        <h2 className="text-2xl font-bold mb-2">Booking Confirmed!</h2>
-        <p>Check your email for details and a calendar invite.</p>
-        <button onClick={onClose} className="mt-4 btn">Close</button>
+      <div className="p-6 text-center bg-black/90 border border-white/10 rounded-2xl shadow-xl max-w-sm mx-auto backdrop-blur-xl">
+        <h2 className="text-2xl font-bold mb-2 text-green-400">
+          ✅ Booking Confirmed!
+        </h2>
+        <p className="text-gray-300">
+          We emailed you the meeting details & Google Calendar invite.
+        </p>
+        <button
+          onClick={onClose}
+          className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg"
+        >
+          Close
+        </button>
       </div>
     );
 
+  // ✅ MAIN FORM
   return (
-    <div className="p-6 bg-white rounded-xl shadow-xl max-w-sm mx-auto">
-      <h2 className="text-2xl font-bold mb-4">Schedule a Call</h2>
-      <label className="block mb-2">Your Email</label>
+    <div className="p-6 bg-black/90 border border-white/10 rounded-2xl shadow-2xl max-w-sm mx-auto backdrop-blur-xl">
+      <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+        Schedule a Call
+      </h2>
+
+      {/* Email */}
+      <label className="block mb-1 text-gray-300 font-medium">Your Email</label>
       <input
         type="email"
-        className="input mb-4 w-full border p-2 rounded"
+        className="w-full bg-black/40 border border-white/10 p-2 text-white rounded-lg mb-3 outline-none focus:ring-2 focus:ring-cyan-500"
         value={email}
         onChange={e => setEmail(e.target.value)}
-        required
+        placeholder="you@example.com"
       />
-      <label className="block mb-2">Choose a slot</label>
-      <div className="space-y-2 mb-4">
-        {availableSlots.length === 0 && <div>No slots available today.</div>}
-        {availableSlots.map((slot, i) => (
-          <button
-            key={i}
-            type="button"
-            onClick={() => setSelected(slot)}
-            className={`btn w-full border p-2 rounded ${selected === slot ? "bg-blue-500 text-white" : ""}`}
-          >
-            {slot.date} at {slot.time}
-          </button>
-        ))}
+
+      {/* Slots */}
+      <label className="block mb-2 text-gray-300 font-medium">Choose a Slot</label>
+      <div className="space-y-2 max-h-52 overflow-auto custom-scroll pr-1">
+        {availableSlots.length === 0 && (
+          <div className="text-red-400 font-medium">No slots available today.</div>
+        )}
+
+        {availableSlots.map((slot, i) => {
+          const active = selected?.time === slot.time;
+
+          return (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setSelected(slot)}
+              className={`w-full p-2 rounded-lg border transition-all ${
+                active
+                  ? "bg-cyan-600 text-white border-cyan-500 shadow-lg"
+                  : "border-white/10 text-gray-300 hover:bg-white/5"
+              }`}
+            >
+              {slot.time} — {slot.date}
+            </button>
+          );
+        })}
       </div>
+
+      {/* Error */}
+      {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
+
+      {/* Book */}
       <button
-        className="btn-primary w-full bg-gradient-to-r from-fuchsia-600 to-cyan-500 text-white px-4 py-2 rounded"
         onClick={bookSlot}
-        disabled={!selected || !email || loading}
+        disabled={!email || !selected || loading}
+        className="mt-5 w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-4 py-2 rounded-lg text-lg font-medium shadow-lg hover:opacity-90 transition-all disabled:opacity-40"
       >
-        {loading ? "Booking..." : "Book Call"}
+        {loading ? "Booking..." : "✅ Book Call"}
+      </button>
+
+      <button
+        onClick={onClose}
+        className="mt-3 w-full text-gray-500 hover:text-gray-300 text-sm"
+      >
+        Cancel
       </button>
     </div>
   );

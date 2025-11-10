@@ -1,161 +1,145 @@
-// 'use client';
-// import React, { useEffect, useState } from 'react';
-// import ScheduleCallModal from './ScheduleCallModal';
+"use client";
 
-// const CompanyBanner = () => {
-//   const [watermarkGrid, setWatermarkGrid] = useState<
-//     { top: string; left: string; rotate: string }[]
-//   >([]);
-//   const [showModal, setShowModal] = useState(false);
+import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import ScheduleCallModal from "./ScheduleCallModal";
 
-//   useEffect(() => {
-//     const rows = 5,
-//       cols = 4,
-//       grid = [];
-//     for (let r = 0; r < rows; r++)
-//       for (let c = 0; c < cols; c++)
-//         grid.push({
-//           top: `${(r * 100) / rows + 4}%`,
-//           left: `${(c * 100) / cols + 4}%`,
-//           rotate: `${Math.random() * 30 - 15}deg`,
-//         });
-//     setWatermarkGrid(grid);
-//   }, []);
-
-//   return (
-//     <section className="relative overflow-hidden my-8 bg-gradient-to-b from-white to-blue-50 text-gray-900 py-24 px-6 sm:px-12 lg:px-24 rounded-3xl shadow-2xl border border-gray-300">
-//       {/* Watermark Grid */}
-//       <div className="absolute inset-0 pointer-events-none z-0 select-none">
-//         {watermarkGrid.map((pos, i) => (
-//           <span
-//             key={i}
-//             className="absolute text-2xl sm:text-4xl font-extrabold opacity-5 whitespace-nowrap text-gray-900"
-//             style={{
-//               top: pos.top,
-//               left: pos.left,
-//               transform: `rotate(${pos.rotate})`,
-//               userSelect: 'none',
-//             }}
-//           >
-//             Talent With Us
-//           </span>
-//         ))}
-//       </div>
-
-//       {/* Content */}
-//       <div className="relative z-10 max-w-4xl mx-auto text-center ">
-//         <h1 className="text-3xl md:text-4xl font-extrabold leading-tight tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[#1EB8F3] to-[#0066FF] drop-shadow-md">
-//           Building Exceptional Digital Products
-//         </h1>
-//         <p className="mt-6 text-lg sm:text-xl max-w-3xl mx-auto text-gray-800 leading-relaxed">
-//           At <span className="font-semibold text-gray-900">Talent With Us</span>
-//           , we craft high-impact websites, powerful applications, and end-to-end
-//           digital systems that fuel business innovation. Our agile process and
-//           deep tech expertise guarantee precise delivery at scale.
-//         </p>
-//         <div className="mt-12">
-//           <button
-//             aria-label="Schedule a call"
-//             onClick={() => setShowModal(true)}
-//             className="inline-block bg-gradient-to-r from-[#00AEEF] to-[#0052CC] text-white font-semibold text-lg px-10 py-3 rounded-2xl shadow-lg transition-transform transform hover:scale-105 hover:opacity-90 cursor-pointer focus:outline-none focus:ring-4 focus:ring-fuchsia-300 focus:ring-opacity-60"
-//           >
-//             Schedule a Call
-//           </button>
-//         </div>
-//         {showModal && (
-//           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
-//             <ScheduleCallModal onClose={() => setShowModal(false)} />
-//           </div>
-//         )}
-//       </div>
-//     </section>
-//   );
-// };
-
-// export default CompanyBanner;
-
-'use client';
-
-import React, { useEffect, useState } from 'react';
-import ScheduleCallModal from './ScheduleCallModal';
-
-const CompanyBanner = () => {
-  const [watermarkGrid, setWatermarkGrid] = useState<
-    { top: string; left: string; rotate: string }[]
-  >([]);
+export default function CompanyBanner() {
   const [showModal, setShowModal] = useState(false);
+  const [time, setTime] = useState("");
+  const [stats, setStats] = useState({ projects: 0, clients: 0, satisfaction: 0 });
 
+  // ✅ Lightweight clock update (optimized)
   useEffect(() => {
-    const rows = 5,
-      cols = 4,
-      grid = [];
-    for (let r = 0; r < rows; r++)
-      for (let c = 0; c < cols; c++)
-        grid.push({
-          top: `${(r * 100) / rows + 4}%`,
-          left: `${(c * 100) / cols + 4}%`,
-          rotate: `${Math.random() * 30 - 15}deg`,
-        });
-    setWatermarkGrid(grid);
+    const interval = setInterval(() => {
+      setTime(
+        new Date().toLocaleTimeString("en-US", {
+          hour12: true,
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        })
+      );
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // ✅ Smooth stats animation – no heavy loops
+  useEffect(() => {
+    const duration = 1000;
+    const start = performance.now();
+
+    const animate = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1);
+
+      setStats({
+        projects: Math.round(progress * 50),
+        clients: Math.round(progress * 35),
+        satisfaction: Math.round(progress * 99.8),
+      });
+
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+
+    requestAnimationFrame(animate);
   }, []);
 
   return (
-    <section className="relative overflow-hidden my-8 bg-gradient-to-b from-white to-blue-50 text-gray-900 py-28 px-6 sm:px-12 lg:px-24 rounded-3xl shadow-2xl border border-gray-300">
-      {/* Watermark Grid */}
-      <div className="absolute inset-0 pointer-events-none z-0 select-none">
-        {watermarkGrid.map((pos, i) => (
-          <span
-            key={i}
-            className="absolute text-2xl sm:text-4xl font-extrabold opacity-10 whitespace-nowrap text-gradient-blue-logo"
-            style={{
-              top: pos.top,
-              left: pos.left,
-              transform: `rotate(${pos.rotate})`,
-              userSelect: 'none',
-            }}
-          >
-            Talent With Us
-          </span>
-        ))}
-      </div>
+    <section className="relative my-16 bg-black text-white py-24 px-6 sm:px-12 lg:px-20 rounded-3xl border border-white/10 overflow-hidden">
 
-      {/* Content */}
-      <div className="relative z-10 max-w-4xl mx-auto text-center">
-        <h1 className="text-3xl md:text-5xl font-extrabold leading-tight tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[#1EB8F3] via-[#00AEEF] to-[#0059FF] drop-shadow-lg">
+      {/* ✅ Soft background glow */}
+      <div className="absolute inset-0 bg-gradient-to-br from-cyan-600/10 via-transparent to-purple-600/10" />
+
+      {/* ✅ Lightweight patterned grid */}
+      <div
+        className="absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
+        }}
+      />
+
+      {/* ✅ CONTENT */}
+      <motion.div
+        initial={{ opacity: 0, y: 35 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+        className="relative z-10 max-w-6xl mx-auto text-center"
+      >
+
+        {/* ✅ LIVE CLOCK */}
+        <div className="flex justify-center items-center gap-4 mb-8">
+          <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+            <span className="font-mono text-cyan-300 text-sm">{time}</span>
+          </div>
+
+          <span className="px-3 py-1 bg-green-600/20 text-green-300 border border-green-600/30 text-xs rounded-full font-semibold">
+            LIVE
+          </span>
+        </div>
+
+        {/* ✅ TITLE */}
+        <h1 className="text-4xl md:text-6xl lg:text-7xl font-black leading-tight mb-6 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
           Building Exceptional Digital Products
         </h1>
-        <p className="mt-6 text-lg sm:text-xl max-w-3xl mx-auto text-gray-800 leading-relaxed">
-          At <span className="font-semibold text-gray-900">Talent With Us</span>, we craft high-impact websites, powerful applications, and end-to-end digital systems that fuel business innovation. Our agile process and deep tech expertise guarantee precise delivery at scale.
+
+        {/* ✅ SUBTEXT */}
+        <p className="text-gray-300 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
+          We design and develop powerful websites, next-gen applications, and intelligent digital systems that scale with your business.
         </p>
-        <div className="mt-14">
-          <button
-            aria-label="Schedule a call"
-            onClick={() => setShowModal(true)}
-            className="inline-block bg-gradient-to-r from-[#00AEEF] to-[#0059FF] text-white font-semibold text-lg px-12 py-4 rounded-2xl shadow-xl transition-transform transform hover:scale-105 hover:opacity-90 cursor-pointer focus:outline-none focus:ring-4 focus:ring-fuchsia-300 focus:ring-opacity-60"
-          >
-            Schedule a Call
-          </button>
+
+        {/* ✅ STATS (ultra-light animation) */}
+        <div className="grid grid-cols-3 gap-6 max-w-md mx-auto my-12">
+          {[
+            { label: "Projects", value: stats.projects, color: "text-cyan-400" },
+            { label: "Clients", value: stats.clients, color: "text-blue-400" },
+            { label: "Satisfaction", value: `${stats.satisfaction}%`, color: "text-green-400" },
+          ].map((item, i) => (
+            <motion.div
+              key={i}
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 250, damping: 20 }}
+              className="text-center p-4 bg-white/5 border border-white/10 rounded-xl backdrop-blur-sm"
+            >
+              <div className={`text-2xl font-bold ${item.color}`}>{item.value}</div>
+              <div className="text-sm text-gray-400">{item.label}</div>
+            </motion.div>
+          ))}
         </div>
+
+        {/* ✅ CTA */}
+        <motion.button
+          onClick={() => setShowModal(true)}
+          whileHover={{ scale: 1.06 }}
+          whileTap={{ scale: 0.95 }}
+          className="relative bg-gradient-to-r from-cyan-500 to-blue-600 px-12 py-4 rounded-2xl text-lg font-bold shadow-xl"
+        >
+          Schedule a Call
+        </motion.button>
+      </motion.div>
+
+      {/* ✅ MODAL */}
+      <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
-            <ScheduleCallModal onClose={() => setShowModal(false)} />
-          </div>
+          <motion.div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.85, opacity: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              <ScheduleCallModal onClose={() => setShowModal(false)} />
+            </motion.div>
+          </motion.div>
         )}
-      </div>
-      <style jsx>{`
-        .text-gradient-blue-logo {
-          background: linear-gradient(
-            90deg,
-            #1EB8F3 0%,
-            #00AEEF 40%,
-            #0059FF 80%
-          );
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-      `}</style>
+      </AnimatePresence>
     </section>
   );
-};
-
-export default CompanyBanner;
+}

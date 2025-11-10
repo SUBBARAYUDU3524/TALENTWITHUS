@@ -1,149 +1,8 @@
-// import { memo, useMemo } from 'react';
-// import { motion } from 'framer-motion';
-// import { useInView } from 'react-intersection-observer';
-// import {
-//   CodeBracketIcon,
-//   DevicePhoneMobileIcon,
-//   ArrowPathIcon,
-//   CpuChipIcon,
-//   ServerIcon,
-//   RocketLaunchIcon,
-//   ShieldCheckIcon,
-//   GlobeAltIcon,
-// } from '@heroicons/react/24/outline';
+"use client";
 
-// // Static data memoized for performance
-// const SERVICES = [
-//   {
-//     title: 'Web Development',
-//     description: 'High-performance websites with modern tech stacks.',
-//     icon: CodeBracketIcon,
-//   },
-//   {
-//     title: 'Mobile Applications',
-//     description: 'iOS & Android apps with flawless UX.',
-//     icon: DevicePhoneMobileIcon,
-//   },
-//   {
-//     title: 'Automation Tools',
-//     description: 'Smart solutions to streamline your workflows.',
-//     icon: ArrowPathIcon,
-//   },
-//   {
-//     title: 'Digital Products',
-//     description: 'Custom software for your specific needs.',
-//     icon: CpuChipIcon,
-//   },
-//   {
-//     title: 'Cloud Solutions',
-//     description: 'Scalable infrastructure for your applications.',
-//     icon: ServerIcon,
-//   },
-//   {
-//     title: 'UI/UX Design',
-//     description: 'Beautiful interfaces with intuitive experiences.',
-//     icon: RocketLaunchIcon,
-//   },
-//   {
-//     title: 'Maintenance & Support',
-//     description: 'Reliable ongoing support for your digital assets.',
-//     icon: ShieldCheckIcon,
-//   },
-//   {
-//     title: 'Consulting',
-//     description: 'Expert guidance for your digital strategy.',
-//     icon: GlobeAltIcon,
-//   },
-// ] as const;
-
-// const CARD_ANIMATION_VARIANTS = {
-//   hidden: { opacity: 0, y: 40 },
-//   visible: (i: number) => ({
-//     opacity: 1,
-//     y: 0,
-//     transition: {
-//       delay: i * 0.15,
-//       type: 'spring',
-//       stiffness: 100,
-//       damping: 18,
-//     },
-//   }),
-// };
-
-// const SECTION_ANIMATION = {
-//   hidden: { opacity: 0, y: 50 },
-//   visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: 'easeOut' } },
-// };
-
-// function WhatWeDoComponent() {
-//   // Intersection observer with triggerOnce controls animation play once
-//   const [ref, inView] = useInView({ threshold: 0.15, triggerOnce: true });
-
-//   const services = useMemo(() => SERVICES, []);
-
-//   return (
-//     <section
-//       id="services"
-//       ref={ref}
-//       aria-label="Our Digital Services"
-//       className="py-20 relative bg-gradient-to-b from-white to-blue-50"
-//     >
-//       <div className="container mx-auto px-6 md:px-12">
-//         <motion.div
-//           initial="hidden"
-//           animate={inView ? 'visible' : 'hidden'}
-//           variants={SECTION_ANIMATION}
-//           className="text-center mb-16 max-w-4xl mx-auto"
-//         >
-//           <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-3 drop-shadow-sm">
-//             Our Digital Services
-//           </h2>
-//           <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-//             Comprehensive solutions tailored to your unique business needs.
-//           </p>
-//           <div className="mt-6 h-1 w-20 mx-auto rounded-full bg-gradient-to-r from-[#1EB8F3] to-[#0059FF]" />
-//         </motion.div>
-
-//         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-//           {services.map((service, idx) => {
-//             const Icon = service.icon;
-//             return (
-//               <motion.article
-//                 key={service.title}
-//                 initial="hidden"
-//                 animate={inView ? 'visible' : 'hidden'}
-//                 variants={CARD_ANIMATION_VARIANTS}
-//                 custom={idx}
-//                 tabIndex={0}
-//                 aria-label={`${service.title} service`}
-//                 className="bg-white/95 shadow-lg rounded-xl p-7 border border-gray-200 hover:border-blue-500 focus-within:border-blue-500 transition-transform transform hover:-translate-y-2 focus-within:-translate-y-2 outline-none"
-//               >
-//                 <div
-//                   className="p-4 rounded-full ml-25 md:ml-0 bg-gradient-to-r from-[#1EB8F3] to-[#0059FF] text-white inline-flex mb-5 shadow-md"
-//                   aria-hidden="true"
-//                 >
-//                   <Icon className="h-9 w-9" />
-//                 </div>
-//                 <h3 className="text-xl text-center md:text-left font-semibold text-gray-900 mb-3 leading-tight">
-//                   {service.title}
-//                 </h3>
-//                 <p className="text-gray-600 text-center md:text-left leading-relaxed">
-//                   {service.description}
-//                 </p>
-//               </motion.article>
-//             );
-//           })}
-//         </div>
-//       </div>
-//     </section>
-//   );
-// }
-
-// export default memo(WhatWeDoComponent);
-
-import { memo, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
+import { memo, useMemo, } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useInView } from "react-intersection-observer";
 import {
   CodeBracketIcon,
   DevicePhoneMobileIcon,
@@ -153,127 +12,187 @@ import {
   RocketLaunchIcon,
   ShieldCheckIcon,
   GlobeAltIcon,
-} from '@heroicons/react/24/outline';
+} from "@heroicons/react/24/outline";
 
+// ✅ Pure static data (never re-renders)
 const SERVICES = [
   {
-    title: 'Web Development',
-    description: 'High-performance websites with modern tech stacks.',
+    title: "Web Development",
+    description:
+      "High-performance websites with modern tech stacks and cutting-edge 3D animations.",
     icon: CodeBracketIcon,
+    gradient: "from-purple-500 to-cyan-500",
   },
   {
-    title: 'Mobile Applications',
-    description: 'iOS & Android apps with flawless UX.',
+    title: "Mobile Applications",
+    description: "iOS & Android apps with flawless UX and native performance.",
     icon: DevicePhoneMobileIcon,
+    gradient: "from-blue-500 to-emerald-500",
   },
   {
-    title: 'Automation Tools',
-    description: 'Smart solutions to streamline your workflows.',
+    title: "Automation Tools",
+    description: "AI-powered solutions to streamline and optimize workflows.",
     icon: ArrowPathIcon,
+    gradient: "from-green-500 to-teal-500",
   },
   {
-    title: 'Digital Products',
-    description: 'Custom software for your specific needs.',
+    title: "AI Models",
+    description:
+      "Custom machine learning models tailored to your business needs.",
     icon: CpuChipIcon,
+    gradient: "from-orange-500 to-red-500",
   },
   {
-    title: 'Cloud Solutions',
-    description: 'Scalable infrastructure for your applications.',
+    title: "Cloud Solutions",
+    description:
+      "Scalable cloud infrastructure with enterprise-grade security.",
     icon: ServerIcon,
+    gradient: "from-indigo-500 to-purple-500",
   },
   {
-    title: 'UI/UX Design',
-    description: 'Beautiful interfaces with intuitive experiences.',
+    title: "UI/UX Design",
+    description:
+      "Immersive interfaces with intuitive experiences and micro-interactions.",
     icon: RocketLaunchIcon,
+    gradient: "from-pink-500 to-rose-500",
   },
   {
-    title: 'Maintenance & Support',
-    description: 'Reliable ongoing support for your digital assets.',
+    title: "Security & Support",
+    description: "24/7 monitoring and protection for your digital assets.",
     icon: ShieldCheckIcon,
+    gradient: "from-amber-500 to-yellow-500",
   },
   {
-    title: 'Consulting',
-    description: 'Expert guidance for your digital strategy.',
+    title: "Consulting",
+    description:
+      "Strategic guidance for your digital transformation journey.",
     icon: GlobeAltIcon,
+    gradient: "from-cyan-500 to-sky-500",
   },
-] as const;
+];
 
-const CARD_ANIMATION_VARIANTS = {
-  hidden: { opacity: 0, y: 40 },
+const CARD_VARIANTS = {
+  hidden: { opacity: 0, y: 40, scale: 0.96 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: {
-      delay: i * 0.15,
-      type: 'spring',
-      stiffness: 100,
-      damping: 18,
-    },
+    scale: 1,
+    transition: { delay: i * 0.08, duration: 0.6, ease: "easeOut" },
   }),
+  hover: {
+    y: -6,
+    scale: 1.03,
+    rotateX: 2,
+    rotateY: -2,
+    transition: { duration: 0.25 },
+  },
 };
 
-const SECTION_ANIMATION = {
-  hidden: { opacity: 0, y: 50 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: 'easeOut' } },
+const SECTION_VARIANTS = {
+  hidden: { opacity: 0, y: 60 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+  },
 };
 
 function WhatWeDoComponent() {
-  const [ref, inView] = useInView({ threshold: 0.15, triggerOnce: true });
+  const [ref, inView] = useInView({ threshold: 0.1, triggerOnce: true });
   const services = useMemo(() => SERVICES, []);
 
   return (
     <section
       id="services"
       ref={ref}
-      aria-label="Our Digital Services"
-      className="py-15 relative bg-gradient-to-b from-white to-blue-50"
+      className="py-20 relative bg-gradient-to-br from-gray-900 via-black to-slate-900 overflow-hidden"
     >
-      <div className="container mx-auto px-6 md:px-12">
+      {/* ✅ Lightweight animated backdrop (GPU-friendly) */}
+      <div className="pointer-events-none absolute inset-0 opacity-[0.13]">
+        <div className="absolute top-10 left-1/3 w-96 h-96 bg-blue-500/10 blur-3xl rounded-full animate-pulse" />
+        <div className="absolute bottom-0 right-1/3 w-80 h-80 bg-purple-500/10 blur-3xl animate-pulse delay-500" />
+      </div>
+
+      <div className="container mx-auto px-6 md:px-12 relative z-10">
         <motion.div
+          variants={SECTION_VARIANTS}
           initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
-          variants={SECTION_ANIMATION}
-          className="text-center mb-12 max-w-4xl mx-auto"
+          animate={inView ? "visible" : "hidden"}
+          className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-[#1EB8F3] to-[#0059FF] drop-shadow">
+          <h2 className="text-4xl md:text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
             Our Digital Services
           </h2>
-          <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed ">
-            Comprehensive solutions tailored to your unique business needs.
+
+          <p className="text-xl md:text-2xl text-gray-300 mt-4 max-w-3xl mx-auto">
+            Transformative solutions powered by cutting-edge technology &
+            exceptional design.
           </p>
-          <div className="mt-6 h-1 w-20 mx-auto rounded-full bg-gradient-to-r from-[#1EB8F3] to-[#0059FF]" />
+
+          <div className="flex justify-center mt-6 space-x-3">
+            <div className="h-1 w-20 bg-cyan-500 rounded-full" />
+            <div className="h-1 w-6 bg-blue-500 rounded-full" />
+            <div className="h-1 w-20 bg-purple-500 rounded-full" />
+          </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-          {services.map((service, idx) => {
+        {/* ✅ Services Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {services.map((service, index) => {
             const Icon = service.icon;
             return (
-              <motion.article
+              <motion.div
                 key={service.title}
+                custom={index}
+                variants={CARD_VARIANTS}
                 initial="hidden"
-                animate={inView ? 'visible' : 'hidden'}
-                variants={CARD_ANIMATION_VARIANTS}
-                custom={idx}
-                tabIndex={0}
-                aria-label={`${service.title} service`}
-                className="bg-white/95 shadow-lg rounded-xl p-7 border border-gray-200 flex flex-col items-center justify-center transition-all duration-300 hover:border-blue-500 focus-within:border-blue-500 hover:shadow-[0_8px_32px_0_rgba(30,184,243,0.18),0_1.5px_16px_0_rgba(0,89,255,0.12)] focus-within:shadow-[0_8px_32px_0_rgba(30,184,243,0.18),0_1.5px_16px_0_rgba(0,89,255,0.12)] outline-none"
+                animate={inView ? "visible" : "hidden"}
+                whileHover="hover"
+                whileTap={{ scale: 0.97 }}
+                className="group relative p-7 rounded-2xl bg-gray-800/40 backdrop-blur-md border border-gray-700/40 hover:border-cyan-400/40 transition-all duration-300"
               >
+                {/* ✅ Light Glow (very optimized) */}
                 <div
-                  className="p-4 rounded-full bg-gradient-to-r from-[#1EB8F3] to-[#0059FF] text-white inline-flex mb-5 shadow-md transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_12px_#1EB8F3] focus-within:scale-110 focus-within:drop-shadow-[0_0_12px_#1EB8F3]"
-                  aria-hidden="true"
+                  className={`absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-15 bg-gradient-to-br ${service.gradient} transition-opacity duration-300`}
+                />
+
+                {/* ✅ Icon */}
+                <div
+                  className={`p-4 inline-flex rounded-xl bg-gradient-to-br ${service.gradient} text-white shadow-lg mb-6`}
                 >
-                  <Icon className="h-9 w-9" />
+                  <Icon className="h-7 w-7" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3 text-center leading-tight">
+
+                {/* ✅ Title */}
+                <h3 className="text-xl font-bold text-white mb-3 group-hover:text-cyan-300 transition-all">
                   {service.title}
                 </h3>
-                <p className="text-gray-600 text-center leading-relaxed">
+
+                {/* ✅ Description */}
+                <p className="text-gray-400 group-hover:text-gray-300 transition-all leading-relaxed">
                   {service.description}
                 </p>
-              </motion.article>
+              </motion.div>
             );
           })}
         </div>
+
+        {/* ✅ CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 0.4, duration: 0.6 }}
+          className="text-center mt-16"
+        >
+          <motion.button
+            whileHover={{
+              scale: 1.05,
+            }}
+            className="px-10 py-4 text-lg rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold shadow-xl hover:shadow-cyan-500/30 transition-all"
+          >
+            Start Your Project Today
+          </motion.button>
+        </motion.div>
       </div>
     </section>
   );

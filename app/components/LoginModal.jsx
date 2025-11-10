@@ -1,317 +1,24 @@
-// 'use client';
-// import { useState } from 'react';
-// import { motion, AnimatePresence } from 'framer-motion';
-// import {
-//   GoogleAuthProvider,
-//   createUserWithEmailAndPassword,
-//   signInWithEmailAndPassword,
-//   signInWithPopup,
-// } from 'firebase/auth';
-// import { auth } from '../../FirebaseConfig'; // Firebase setup
+"use client";
 
-// export default function LoginModal({ isOpen, onClose }) {
-//   const [error, setError] = useState('');
-//   const [isRegistering, setIsRegistering] = useState(false); // Toggle between login and register views
-
-//   const handleGoogleLogin = async () => {
-//     const provider = new GoogleAuthProvider();
-//     try {
-//       const result = await signInWithPopup(auth, provider);
-//       onClose();
-//     } catch (err) {
-//       setError(err.message);
-//     }
-//   };
-
-//   const handleEmailLogin = async (email, password) => {
-//     try {
-//       const userCredential = await signInWithEmailAndPassword(
-//         auth,
-//         email,
-//         password
-//       );
-//       onClose();
-//     } catch (err) {
-//       setError(err.message);
-//     }
-//   };
-
-//   const handleRegister = async (fullName, email, password) => {
-//     try {
-//       const userCredential = await createUserWithEmailAndPassword(
-//         auth,
-//         email,
-//         password
-//       );
-//       // Save full name to user profile if necessary
-//       onClose();
-//     } catch (err) {
-//       setError(err.message);
-//     }
-//   };
-
-//   if (!isOpen) return null;
-
-//   return (
-//     <AnimatePresence>
-//       <motion.div
-//         className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md"
-//         initial={{ opacity: 0 }}
-//         animate={{ opacity: 1 }}
-//         exit={{ opacity: 0 }}
-//       >
-//         <motion.div
-//           className="
-//             bg-gradient-to-br from-[#12172A] via-[#192146] to-[#1A233A] text-white rounded-2xl shadow-2xl p-0 max-w-3xl w-full flex flex-col md:flex-row relative overflow-hidden border border-cyan-900
-//           "
-//           initial={{ scale: 0.95 }}
-//           animate={{ scale: 1 }}
-//           exit={{ scale: 0.95 }}
-//         >
-//           {/* Close Icon */}
-//           <button
-//             onClick={onClose}
-//             className="absolute top-4 right-4 text-gray-400 hover:text-white z-10"
-//             aria-label="Close"
-//           >
-//             ✕
-//           </button>
-
-//           {/* Left Section: Blog Logo & Info */}
-//           <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-6 py-10 md:px-8 md:py-12 bg-gradient-to-tl from-fuchsia-800/60 to-cyan-900/40 border-b md:border-b-0 md:border-r border-gray-700">
-//             <div className="mb-4 w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden shadow-lg border-4 border-cyan-400 bg-white flex items-center justify-center">
-//               <img
-//                 src="/assets/ERRTEKNALOZY.jpg"
-//                 alt="Talent with Us Blog Logo"
-//                 className="w-full h-full object-cover"
-//                 draggable={false}
-//               />
-//             </div>
-//             <h1 className="text-xl md:text-2xl font-bold mb-2 text-cyan-300 tracking-wide drop-shadow-lg text-center">
-//               Talent With Us Blog
-//             </h1>
-//             <p className="text-center text-gray-300 mb-4 text-sm md:text-base">
-//               Unlock insights, tips, and the latest trends from the world of
-//               technology, development, and creative digital solutions.
-//             </p>
-//             <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
-//               <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-cyan-700/80 text-cyan-100 tracking-wide">
-//                 #Tech
-//               </span>
-//               <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-fuchsia-700/80 text-fuchsia-100 tracking-wide">
-//                 #Inspiration
-//               </span>
-//               <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-cyan-400 to-fuchsia-500 text-white tracking-wide">
-//                 #Digital
-//               </span>
-//             </div>
-//             <p className="text-xs text-gray-400 mt-2">
-//               By continuing, you agree to our{' '}
-//               <a href="#" className="text-cyan-400 hover:underline">
-//                 Terms of Service
-//               </a>{' '}
-//               and{' '}
-//               <a href="#" className="text-cyan-400 hover:underline">
-//                 Privacy Policy
-//               </a>
-//               .
-//             </p>
-//             {error && (
-//               <p className="text-red-400 text-center mt-4 mb-0 px-3 py-1 rounded bg-red-900/60 text-sm">
-//                 {error}
-//               </p>
-//             )}
-//             <button
-//               onClick={handleGoogleLogin}
-//               className="flex items-center justify-center gap-2 w-full bg-white text-cyan-800 font-semibold py-2 rounded-lg shadow hover:bg-cyan-100 transition-all mt-8"
-//             >
-//               <img
-//                 src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-//                 alt="Google"
-//                 className="w-5 h-5"
-//               />
-//               Continue with Google
-//             </button>
-//           </div>
-
-//           {/* Right Section: Auth Form */}
-//           <div className="w-full md:w-1/2 pl-0 pr-0 md:pr-8 py-8 md:py-12 flex flex-col justify-center md:ml-5">
-//             <div className="rounded-xl p-6 md:p-8 shadow-lg w-full max-w-sm mx-auto">
-//               {isRegistering ? (
-//                 <>
-//                   <h2 className="text-lg md:text-xl font-bold mb-4 text-white text-center">
-//                     Create your account
-//                   </h2>
-//                   <form
-//                     onSubmit={(e) => {
-//                       e.preventDefault();
-//                       const fullName = e.target.fullName.value;
-//                       const email = e.target.email.value;
-//                       const password = e.target.password.value;
-//                       handleRegister(fullName, email, password);
-//                     }}
-//                   >
-//                     <div className="mb-4">
-//                       <label
-//                         htmlFor="fullName"
-//                         className="block text-sm font-medium text-gray-300"
-//                       >
-//                         Full Name
-//                       </label>
-//                       <input
-//                         type="text"
-//                         id="fullName"
-//                         placeholder="Your full name"
-//                         className="w-full px-4 py-2 mt-1 border border-gray-600 rounded-md bg-[#212542] text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-//                         required
-//                       />
-//                     </div>
-//                     <div className="mb-4">
-//                       <label
-//                         htmlFor="email"
-//                         className="block text-sm font-medium text-gray-300"
-//                       >
-//                         Email
-//                       </label>
-//                       <input
-//                         type="email"
-//                         id="email"
-//                         placeholder="Your email"
-//                         className="w-full px-4 py-2 mt-1 border border-gray-600 rounded-md bg-[#212542] text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-//                         required
-//                       />
-//                     </div>
-//                     <div className="mb-6">
-//                       <label
-//                         htmlFor="password"
-//                         className="block text-sm font-medium text-gray-300"
-//                       >
-//                         Password
-//                       </label>
-//                       <input
-//                         type="password"
-//                         id="password"
-//                         placeholder="Your password"
-//                         className="w-full px-4 py-2 mt-1 border border-gray-600 rounded-md bg-[#212542] text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-//                         required
-//                       />
-//                     </div>
-//                     <button
-//                       type="submit"
-//                       className="w-full bg-gradient-to-r from-cyan-500 to-fuchsia-500 text-white font-semibold py-2 rounded-md hover:from-cyan-600 hover:to-fuchsia-600 transition-all"
-//                     >
-//                       Register
-//                     </button>
-//                   </form>
-//                   <p className="text-sm text-gray-400 mt-6 text-center">
-//                     Already have an account?{' '}
-//                     <span
-//                       onClick={() => setIsRegistering(false)}
-//                       className="text-cyan-400 hover:underline cursor-pointer font-semibold"
-//                     >
-//                       Login
-//                     </span>
-//                   </p>
-//                 </>
-//               ) : (
-//                 <>
-//                   <h2 className="text-lg md:text-xl font-bold mb-4 text-white text-center">
-//                     Welcome back!
-//                   </h2>
-//                   <form
-//                     onSubmit={(e) => {
-//                       e.preventDefault();
-//                       const email = e.target.email.value;
-//                       const password = e.target.password.value;
-//                       handleEmailLogin(email, password);
-//                     }}
-//                   >
-//                     <div className="mb-4">
-//                       <label
-//                         htmlFor="email"
-//                         className="block text-sm font-medium text-gray-300"
-//                       >
-//                         Email
-//                       </label>
-//                       <input
-//                         type="email"
-//                         id="email"
-//                         placeholder="Your email"
-//                         className="w-full px-4 py-2 mt-1 border border-gray-600 rounded-md bg-[#212542] text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-//                         required
-//                       />
-//                     </div>
-//                     <div className="mb-6">
-//                       <label
-//                         htmlFor="password"
-//                         className="block text-sm font-medium text-gray-300"
-//                       >
-//                         Password
-//                       </label>
-//                       <input
-//                         type="password"
-//                         id="password"
-//                         placeholder="Your password"
-//                         className="w-full px-4 py-2 mt-1 border border-gray-600 rounded-md bg-[#212542] text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-//                         required
-//                       />
-//                     </div>
-//                     <button
-//                       type="submit"
-//                       className="w-full bg-gradient-to-r from-cyan-500 to-fuchsia-500 text-white font-semibold py-2 rounded-md hover:from-cyan-600 hover:to-fuchsia-600 transition-all"
-//                     >
-//                       Login
-//                     </button>
-//                   </form>
-//                   <p className="text-sm text-gray-400 mt-6 text-center">
-//                     Don’t have an account?{' '}
-//                     <span
-//                       onClick={() => setIsRegistering(true)}
-//                       className="text-cyan-400 hover:underline cursor-pointer font-semibold"
-//                     >
-//                       Register
-//                     </span>
-//                   </p>
-//                 </>
-//               )}
-//             </div>
-//           </div>
-//         </motion.div>
-//       </motion.div>
-//       {/* Hide scroll bar on modal for better mobile UX */}
-//       <style jsx global>{`
-//         @media (max-width: 767px) {
-//           .fixed.inset-0 {
-//             align-items: flex-start !important;
-//             padding-top: 1.5rem !important;
-//             padding-bottom: 1.5rem !important;
-//             overflow-y: auto !important;
-//           }
-//         }
-//       `}</style>
-//     </AnimatePresence>
-//   );
-// }
-
-'use client';
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithPopup,
-} from 'firebase/auth';
-import { auth } from '../../FirebaseConfig';
+} from "firebase/auth";
+import { auth } from "../../FirebaseConfig";
+import Image from "next/image";
 
 export default function LoginModal({ isOpen, onClose }) {
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
+  const provider = new GoogleAuthProvider();
 
   const handleGoogleLogin = async () => {
-    const provider = new GoogleAuthProvider();
     try {
-      const result = await signInWithPopup(auth, provider);
+      await signInWithPopup(auth, provider);
       onClose();
     } catch (err) {
       setError(err.message);
@@ -320,11 +27,7 @@ export default function LoginModal({ isOpen, onClose }) {
 
   const handleEmailLogin = async (email, password) => {
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+      await signInWithEmailAndPassword(auth, email, password);
       onClose();
     } catch (err) {
       setError(err.message);
@@ -333,275 +36,187 @@ export default function LoginModal({ isOpen, onClose }) {
 
   const handleRegister = async (fullName, email, password) => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+      await createUserWithEmailAndPassword(auth, email, password);
       onClose();
     } catch (err) {
       setError(err.message);
     }
   };
 
-  // Add unique keys for the hashtag elements
-  const tags = [
-    { id: 1, text: '#Tech', bg: 'bg-cyan-700/80', textColor: 'text-cyan-100' },
-    { id: 2, text: '#Inspiration', bg: 'bg-fuchsia-700/80', textColor: 'text-fuchsia-100' },
-    { id: 3, text: '#Digital', bg: 'bg-gradient-to-r from-cyan-400 to-fuchsia-500', textColor: 'text-white' }
-  ];
-
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          key="modal-backdrop"
         >
+          {/* Modal */}
           <motion.div
-            className="bg-gradient-to-br from-[#12172A] via-[#192146] to-[#1A233A] text-white rounded-2xl shadow-2xl p-0 max-w-3xl w-full flex flex-col md:flex-row relative overflow-hidden border border-cyan-900"
-            initial={{ scale: 0.95 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0.95 }}
-            key="modal-content"
+            className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 relative overflow-hidden"
+            initial={{ scale: 0.92, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.92, opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
           >
-            {/* Close Icon */}
+            {/* Close Button */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white z-10"
-              aria-label="Close"
-              key="close-button"
+              className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
             >
               ✕
             </button>
 
-            {/* Left Section: Blog Logo & Info */}
-            <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-6 py-10 md:px-8 md:py-12 bg-gradient-to-tl from-fuchsia-800/60 to-cyan-900/40 border-b md:border-b-0 md:border-r border-gray-700"
-                 key="left-section">
-              <div className="mb-4 w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden shadow-lg border-4 border-cyan-400 bg-white flex items-center justify-center"
-                   key="logo-container">
-                 <img
-                src="/talent-with-us-logo copy.png"
-                alt="Talent with Us Logo"
-                className="w-[98px] h-[80px] object-cover"
-                draggable={false}
-              />
-              </div>
-              <h1 className="text-xl md:text-2xl font-bold mb-2 text-cyan-300 tracking-wide drop-shadow-lg text-center"
-                  key="title">
-                Talent With Us Blog
-              </h1>
-              <p className="text-center text-gray-300 mb-4 text-sm md:text-base"
-                 key="description">
-                Unlock insights, tips, and the latest trends from the world of
-                technology, development, and creative digital solutions.
-              </p>
-              <div className="flex flex-wrap items-center justify-center gap-2 mb-6"
-                   key="tags-container">
-                {tags.map(tag => (
-                  <span 
-                    key={tag.id}
-                    className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${tag.bg} ${tag.textColor} tracking-wide`}
-                  >
-                    {tag.text}
-                  </span>
-                ))}
-              </div>
-              <p className="text-xs text-gray-400 mt-2"
-                 key="terms-text">
-                By continuing, you agree to our{' '}
-                <a href="#" className="text-cyan-400 hover:underline"
-                   key="terms-link">
-                  Terms of Service
-                </a>{' '}
-                and{' '}
-                <a href="#" className="text-cyan-400 hover:underline"
-                   key="privacy-link">
-                  Privacy Policy
-                </a>
-                .
-              </p>
-              {error && (
-                <p className="text-red-400 text-center mt-4 mb-0 px-3 py-1 rounded bg-red-900/60 text-sm"
-                   key="error-message">
-                  {error}
-                </p>
-              )}
-              <button
-                onClick={handleGoogleLogin}
-                className="flex items-center justify-center gap-2 w-full bg-white text-cyan-800 font-semibold py-2 rounded-lg shadow hover:bg-cyan-100 transition-all mt-8"
-                key="google-button"
-              >
-                <img
-                  src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-                  alt="Google"
-                  className="w-5 h-5"
-                  key="google-icon"
+            {/* Logo */}
+            <div className="flex flex-col items-center mb-6">
+              <div className="w-20 h-20 rounded-full border border-gray-200 shadow-sm flex items-center justify-center bg-white">
+                <Image
+                  src="/talent-with-us-logo copy.png"
+                  width={60}
+                  height={60}
+                  alt="Talent With Us Logo"
                 />
-                Continue with Google
-              </button>
+              </div>
+              <h2 className="text-xl font-semibold mt-3 text-gray-900">
+                Talent With Us
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Innovation • Technology • Growth
+              </p>
             </div>
 
-            {/* Right Section: Auth Form */}
-            <div className="w-full md:w-1/2 pl-0 pr-0 md:pr-8 py-8 md:py-12 flex flex-col justify-center md:ml-5"
-                 key="right-section">
-              <div className="rounded-xl p-6 md:p-8 shadow-lg w-full max-w-sm mx-auto"
-                   key="form-container">
-                {isRegistering ? (
-                  <div key="register-form">
-                    <h2 className="text-lg md:text-xl font-bold mb-4 text-white text-center"
-                        key="register-title">
-                      Create your account
-                    </h2>
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        const fullName = e.target.fullName.value;
-                        const email = e.target.email.value;
-                        const password = e.target.password.value;
-                        handleRegister(fullName, email, password);
-                      }}
-                      key="register-form-element"
-                    >
-                      <div className="mb-4" key="fullName-field">
-                        <label
-                          htmlFor="fullName"
-                          className="block text-sm font-medium text-gray-300"
-                        >
-                          Full Name
-                        </label>
-                        <input
-                          type="text"
-                          id="fullName"
-                          placeholder="Your full name"
-                          className="w-full px-4 py-2 mt-1 border border-gray-600 rounded-md bg-[#212542] text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                          required
-                          key="fullName-input"
-                        />
-                      </div>
-                      <div className="mb-4" key="email-field">
-                        <label
-                          htmlFor="email"
-                          className="block text-sm font-medium text-gray-300"
-                        >
-                          Email
-                        </label>
-                        <input
-                          type="email"
-                          id="email"
-                          placeholder="Your email"
-                          className="w-full px-4 py-2 mt-1 border border-gray-600 rounded-md bg-[#212542] text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                          required
-                          key="email-input"
-                        />
-                      </div>
-                      <div className="mb-6" key="password-field">
-                        <label
-                          htmlFor="password"
-                          className="block text-sm font-medium text-gray-300"
-                        >
-                          Password
-                        </label>
-                        <input
-                          type="password"
-                          id="password"
-                          placeholder="Your password"
-                          className="w-full px-4 py-2 mt-1 border border-gray-600 rounded-md bg-[#212542] text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                          required
-                          key="password-input"
-                        />
-                      </div>
-                      <button
-                        type="submit"
-                        className="w-full bg-gradient-to-r from-cyan-500 to-fuchsia-500 text-white font-semibold py-2 rounded-md hover:from-cyan-600 hover:to-fuchsia-600 transition-all"
-                        key="register-submit"
-                      >
-                        Register
-                      </button>
-                    </form>
-                    <p className="text-sm text-gray-400 mt-6 text-center"
-                       key="register-switch">
-                      Already have an account?{' '}
-                      <span
-                        onClick={() => setIsRegistering(false)}
-                        className="text-cyan-400 hover:underline cursor-pointer font-semibold"
-                      >
-                        Login
-                      </span>
-                    </p>
-                  </div>
-                ) : (
-                  <div key="login-form">
-                    <h2 className="text-lg md:text-xl font-bold mb-4 text-white text-center"
-                        key="login-title">
-                      Welcome back!
-                    </h2>
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        const email = e.target.email.value;
-                        const password = e.target.password.value;
-                        handleEmailLogin(email, password);
-                      }}
-                      key="login-form-element"
-                    >
-                      <div className="mb-4" key="login-email-field">
-                        <label
-                          htmlFor="email"
-                          className="block text-sm font-medium text-gray-300"
-                        >
-                          Email
-                        </label>
-                        <input
-                          type="email"
-                          id="email"
-                          placeholder="Your email"
-                          className="w-full px-4 py-2 mt-1 border border-gray-600 rounded-md bg-[#212542] text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                          required
-                          key="login-email-input"
-                        />
-                      </div>
-                      <div className="mb-6" key="login-password-field">
-                        <label
-                          htmlFor="password"
-                          className="block text-sm font-medium text-gray-300"
-                        >
-                          Password
-                        </label>
-                        <input
-                          type="password"
-                          id="password"
-                          placeholder="Your password"
-                          className="w-full px-4 py-2 mt-1 border border-gray-600 rounded-md bg-[#212542] text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                          required
-                          key="login-password-input"
-                        />
-                      </div>
-                      <button
-                        type="submit"
-                        className="w-full bg-gradient-to-r from-cyan-500 to-fuchsia-500 text-white font-semibold py-2 rounded-md hover:from-cyan-600 hover:to-fuchsia-600 transition-all"
-                        key="login-submit"
-                      >
-                        Login
-                      </button>
-                    </form>
-                    <p className="text-sm text-gray-400 mt-6 text-center"
-                       key="login-switch">
-                      Don't have an account?{' '}
-                      <span
-                        onClick={() => setIsRegistering(true)}
-                        className="text-cyan-400 hover:underline cursor-pointer font-semibold"
-                      >
-                        Register
-                      </span>
-                    </p>
-                  </div>
-                )}
-              </div>
+            {/* Title */}
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
+              {isRegistering ? "Create Your Account" : "Welcome Back"}
+            </h3>
+
+            {/* Google Login */}
+            <button
+              onClick={handleGoogleLogin}
+              className="w-full border border-gray-300 rounded-lg py-2 flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-50 transition mb-4"
+            >
+              <img
+                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                className="w-5 h-5"
+                alt="Google"
+              />
+              Continue with Google
+            </button>
+
+            {/* Divider */}
+            <div className="flex items-center gap-3 my-4">
+              <span className="flex-1 h-px bg-gray-200"></span>
+              <span className="text-xs text-gray-500">OR</span>
+              <span className="flex-1 h-px bg-gray-200"></span>
             </div>
+
+            {/* Error message */}
+            {error && (
+              <p className="text-red-500 bg-red-50 border border-red-200 text-sm rounded-md p-2 mb-3 text-center">
+                {error}
+              </p>
+            )}
+
+            {/* Auth Forms */}
+            {isRegistering ? (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleRegister(
+                    e.target.fullName.value,
+                    e.target.email.value,
+                    e.target.password.value
+                  );
+                }}
+                className="space-y-4"
+              >
+                <input
+                  type="text"
+                  name="fullName"
+                  placeholder="Full Name"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Create Password"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  type="submit"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2 font-medium transition"
+                >
+                  Register
+                </button>
+              </form>
+            ) : (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleEmailLogin(
+                    e.target.email.value,
+                    e.target.password.value
+                  );
+                }}
+                className="space-y-4"
+              >
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  type="submit"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2 font-medium transition"
+                >
+                  Login
+                </button>
+              </form>
+            )}
+
+            {/* Switch */}
+            <p className="text-sm text-gray-600 mt-4 text-center">
+              {isRegistering ? (
+                <>
+                  Already have an account?{" "}
+                  <span
+                    className="text-blue-600 cursor-pointer hover:underline font-medium"
+                    onClick={() => setIsRegistering(false)}
+                  >
+                    Login
+                  </span>
+                </>
+              ) : (
+                <>
+                  Don{`'`}t have an account?{" "}
+                  <span
+                    className="text-blue-600 cursor-pointer hover:underline font-medium"
+                    onClick={() => setIsRegistering(true)}
+                  >
+                    Register
+                  </span>
+                </>
+              )}
+            </p>
+
+            {/* Terms */}
+            <p className="text-[11px] text-gray-400 mt-6 text-center">
+              By continuing, you agree to our Terms & Privacy Policy.
+            </p>
           </motion.div>
         </motion.div>
       )}

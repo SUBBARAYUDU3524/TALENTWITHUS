@@ -1,559 +1,460 @@
-// 'use client';
-
-// import { useState } from 'react';
-// import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-// import { db } from '../../FirebaseConfig';
-
-// const TYPE_OPTIONS = [
-//   {
-//     value: 'website',
-//     label: 'Website',
-//     desc: 'Professional, scalable web platforms for any purpose.',
-//   },
-//   {
-//     value: 'app',
-//     label: 'App',
-//     desc: 'Mobile apps for iOS, Android, or both — native or cross-platform.',
-//   },
-//   {
-//     value: 'automation',
-//     label: 'Automation Tool',
-//     desc: 'Automate workflows, business logic, or repetitive tasks.',
-//   },
-//   {
-//     value: 'ai',
-//     label: 'AI/ML Solution',
-//     desc: 'Custom AI models, chatbots, analytics & intelligent systems.',
-//   },
-//   {
-//     value: 'product',
-//     label: 'Digital Product',
-//     desc: 'SaaS, e-commerce, dashboards, portals and more.',
-//   },
-//   { value: 'other', label: 'Other', desc: 'Tell us your unique vision!' },
-// ];
-
-// export default function CreationRequestForm() {
-//   const [type, setType] = useState(TYPE_OPTIONS[0].value);
-//   const [form, setForm] = useState({
-//     name: '',
-//     purpose: '',
-//     platform: '',
-//     features: '',
-//     targetAudience: '',
-//     phone: '',
-//     details: '',
-//   });
-//   const [submitted, setSubmitted] = useState(false);
-//   const [error, setError] = useState('');
-
-//   const handleChange = (
-//     e: React.ChangeEvent<
-//       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-//     >
-//   ) => {
-//     setForm({ ...form, [e.target.name]: e.target.value });
-//   };
-
-//   const handleTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     setType(e.target.value);
-//     setForm({
-//       name: '',
-//       purpose: '',
-//       platform: '',
-//       features: '',
-//       targetAudience: '',
-//       phone: '',
-//       details: '',
-//     });
-//     setSubmitted(false);
-//     setError('');
-//   };
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     setError('');
-//     try {
-//       const dataToSave = {
-//         requestType: type,
-//         projectName: form.name,
-//         purpose: form.purpose,
-//         platform: ['app', 'automation'].includes(type) ? form.platform : '',
-//         features: form.features,
-//         targetAudience: form.targetAudience,
-//         phoneNumber: form.phone,
-//         details: form.details,
-//         createdAt: serverTimestamp(),
-//       };
-//       await addDoc(collection(db, 'creationRequests'), dataToSave);
-//       setSubmitted(true);
-//       setForm({
-//         name: '',
-//         purpose: '',
-//         platform: '',
-//         features: '',
-//         targetAudience: '',
-//         phone: '',
-//         details: '',
-//       });
-//     } catch {
-//       setError('Something went wrong. Please try again.');
-//       setSubmitted(false);
-//     }
-//   };
-
-//   return (
-//     <section className="py-16 px-4 min-h-screen flex items-center justify-center bg-gradient-to-br from-[#d1e7f9] via-[#dbe3f0] to-[#bbc3df] text-gray-900">
-//       <div className="w-full max-w-4xl mx-auto bg-white/95 rounded-2xl p-12 sm:p-16 shadow-2xl border border-sky-200">
-//         <h2 className="text-3xl font-bold mb-4 text-center text-sky-700 tracking-wide">
-//           Request Your Digital Solution
-//         </h2>
-//         <p className="text-center text-slate-700 mb-12 max-w-xl mx-auto">
-//           Looking for a website, app, or something custom? Tell us your vision —
-//           our expert team will guide you from idea to launch!
-//         </p>
-//         {/* Type Selection */}
-//         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
-//           {TYPE_OPTIONS.map((opt) => (
-//             <label
-//               key={opt.value}
-//               className={`flex flex-col items-center justify-center p-4 rounded-lg border cursor-pointer transition shadow-md select-none text-center text-slate-700 ${
-//                 type === opt.value
-//                   ? 'bg-sky-700 text-white border-sky-800 shadow-lg'
-//                   : 'bg-white border-slate-300 hover:border-sky-500'
-//               }`}
-//               title={opt.desc}
-//             >
-//               <input
-//                 type="radio"
-//                 name="type"
-//                 value={opt.value}
-//                 checked={type === opt.value}
-//                 onChange={handleTypeChange}
-//                 className="sr-only"
-//               />
-//               <span className="text-lg font-semibold">{opt.label}</span>
-//               <small className="mt-1 text-sm text-slate-400">{opt.desc}</small>
-//             </label>
-//           ))}
-//         </div>
-
-//         {submitted ? (
-//           <div className="p-8 bg-green-600 rounded-lg shadow-lg text-white text-center text-xl font-semibold">
-//             Thanks for submitting! Our team will contact you soon.
-//           </div>
-//         ) : (
-//           <form onSubmit={handleSubmit} className="space-y-8">
-//             <div>
-//               <label className="block mb-2 font-semibold text-slate-700">
-//                 {type === 'website'
-//                   ? 'Website Name'
-//                   : type === 'app'
-//                   ? 'App Name'
-//                   : type === 'automation'
-//                   ? 'Automation Tool Name'
-//                   : type === 'ai'
-//                   ? 'AI/ML Solution Name'
-//                   : type === 'product'
-//                   ? 'Product Name'
-//                   : 'Project Name'}
-//               </label>
-//               <input
-//                 name="name"
-//                 value={form.name}
-//                 onChange={handleChange}
-//                 required
-//                 placeholder="Project Name"
-//                 className="w-full rounded-md border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-400"
-//               />
-//             </div>
-//             <div>
-//               <label className="block mb-2 font-semibold text-slate-700">
-//                 Purpose
-//               </label>
-//               <input
-//                 name="purpose"
-//                 value={form.purpose}
-//                 onChange={handleChange}
-//                 required
-//                 placeholder="e.g. Sell products, automate tasks, launch SaaS"
-//                 className="w-full rounded-md border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-400"
-//               />
-//             </div>
-
-//             {(type === 'app' || type === 'automation') && (
-//               <div>
-//                 <label className="block mb-2 font-semibold text-slate-700">
-//                   Platform
-//                 </label>
-//                 <select
-//                   name="platform"
-//                   value={form.platform}
-//                   onChange={handleChange}
-//                   required
-//                   className="w-full rounded-md border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-400"
-//                 >
-//                   <option value="">Select platform</option>
-//                   <option value="iOS">iOS</option>
-//                   <option value="Android">Android</option>
-//                   <option value="Desktop">Desktop</option>
-//                   <option value="Other">Other</option>
-//                 </select>
-//               </div>
-//             )}
-
-//             <div>
-//               <label className="block mb-2 font-semibold text-slate-700">
-//                 Key Features / Requirements
-//               </label>
-//               <input
-//                 name="features"
-//                 value={form.features}
-//                 onChange={handleChange}
-//                 required
-//                 placeholder="e.g. Payments, AI, chat, admin panel"
-//                 className="w-full rounded-md border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-400"
-//               />
-//             </div>
-
-//             <div>
-//               <label className="block mb-2 font-semibold text-slate-700">
-//                 Target Audience
-//               </label>
-//               <input
-//                 name="targetAudience"
-//                 value={form.targetAudience}
-//                 onChange={handleChange}
-//                 required
-//                 placeholder="e.g. Students, enterprises, public"
-//                 className="w-full rounded-md border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-400"
-//               />
-//             </div>
-
-//             <div>
-//               <label className="block mb-2 font-semibold text-slate-700">
-//                 Phone Number
-//               </label>
-//               <input
-//                 name="phone"
-//                 value={form.phone}
-//                 onChange={handleChange}
-//                 required
-//                 type="tel"
-//                 pattern="[0-9]{10,15}"
-//                 placeholder="Enter your phone number"
-//                 className="w-full rounded-md border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-400"
-//               />
-//             </div>
-
-//             <div>
-//               <label className="block mb-2 font-semibold text-slate-700">
-//                 More Details (optional)
-//               </label>
-//               <textarea
-//                 name="details"
-//                 value={form.details}
-//                 onChange={handleChange}
-//                 rows={4}
-//                 placeholder="Describe your requirements, timelines, inspirations, or questions…"
-//                 className="w-full rounded-md border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-400 resize-none"
-//               />
-//             </div>
-
-//             {error && <p className="text-red-600 text-center">{error}</p>}
-
-//             <button
-//               type="submit"
-//               className="w-full py-3 bg-sky-600 text-white font-semibold rounded-lg shadow-lg hover:bg-sky-700 cursor-pointer transition-colors duration-300 focus:outline-none focus:ring-4 focus:ring-sky-400"
-//             >
-//               Request{' '}
-//               {TYPE_OPTIONS.find((opt) => opt.value === type)?.label ||
-//                 'Project'}
-//             </button>
-//           </form>
-//         )}
-//       </div>
-//     </section>
-//   );
-// }
-
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../FirebaseConfig';
 
-const TYPE_OPTIONS = [
+import {
+  Globe,
+  Smartphone,
+  Bot,
+  FileText,
+  Workflow,
+  BarChart3,
+  Palette,
+  Zap
+} from 'lucide-react';
+
+// ✅ Clean, minimal gradients
+const SERVICE_CATEGORIES = [
   {
-    value: 'website',
-    label: 'Website',
-    desc: 'Professional, scalable web platforms for any purpose.',
+    value: 'web-development',
+    label: 'Web Development',
+    icon: Globe,
+    gradient: 'from-blue-500 to-cyan-500',
+    services: [
+      'Corporate Websites',
+      'E-commerce Platforms',
+      'Web Applications',
+      'Progressive Web Apps (PWA)',
+      'Single Page Applications (SPA)',
+      'CMS Development',
+      'API Development',
+      'Web Portals'
+    ]
   },
   {
-    value: 'app',
-    label: 'App',
-    desc: 'Mobile apps for iOS, Android, or both — native or cross-platform.',
+    value: 'mobile-apps',
+    label: 'Mobile Applications',
+    icon: Smartphone,
+    gradient: 'from-green-500 to-emerald-500',
+    services: [
+      'iOS Native Apps',
+      'Android Native Apps',
+      'Cross-Platform Apps',
+      'React Native Apps',
+      'Flutter Applications',
+      'Mobile Games',
+      'Enterprise Mobile Solutions',
+      'App Store Optimization'
+    ]
+  },
+  {
+    value: 'ai-ml',
+    label: 'AI & Machine Learning',
+    icon: Bot,
+    gradient: 'from-purple-500 to-pink-500',
+    services: [
+      'Custom AI Models',
+      'Chatbots & Virtual Assistants',
+      'Computer Vision',
+      'Natural Language Processing',
+      'Predictive Analytics',
+      'Recommendation Engines',
+      'AI-powered Automation',
+      'Machine Learning APIs'
+    ]
   },
   {
     value: 'automation',
-    label: 'Automation Tool',
-    desc: 'Automate workflows, business logic, or repetitive tasks.',
+    label: 'Automation & Workflows',
+    icon: Workflow,
+    gradient: 'from-orange-500 to-red-500',
+    services: [
+      'Business Process Automation',
+      'N8N Workflows',
+      'Zapier Integrations',
+      'RPA Automation',
+      'CRM Automation',
+      'Marketing Automation',
+      'Data Processing Automation',
+      'Custom Automation Tools'
+    ]
   },
   {
-    value: 'ai',
-    label: 'AI/ML Solution',
-    desc: 'Custom AI models, chatbots, analytics & intelligent systems.',
+    value: 'document-services',
+    label: 'Document Services',
+    icon: FileText,
+    gradient: 'from-yellow-500 to-amber-500',
+    services: [
+      'PDF Automation',
+      'OCR Systems',
+      'Document Workflows',
+      'E-Signature Solutions',
+      'Document Management',
+      'Form Processing',
+      'Doc Generation',
+      'Compliance Systems'
+    ]
   },
   {
-    value: 'product',
-    label: 'Digital Product',
-    desc: 'SaaS, e-commerce, dashboards, portals and more.',
+    value: 'business-tools',
+    label: 'Business Tools',
+    icon: BarChart3,
+    gradient: 'from-cyan-500 to-blue-500',
+    services: [
+      'Salesforce Apps',
+      'CRM Customization',
+      'ERP Solutions',
+      'BI Dashboards',
+      'Project Management Tools',
+      'SaaS Products',
+      'Inventory Management',
+      'HR Systems'
+    ]
   },
-  { value: 'other', label: 'Other', desc: 'Tell us your unique vision!' },
+  {
+    value: 'creative-services',
+    label: 'Creative Services',
+    icon: Palette,
+    gradient: 'from-pink-500 to-rose-500',
+    services: [
+      'UI/UX Design',
+      'Branding',
+      'Marketing Assets',
+      'Animations',
+      'Presentations',
+      'Video Production',
+      'Interactive Demos',
+      'Prototypes'
+    ]
+  },
+  {
+    value: 'emerging-tech',
+    label: 'Emerging Technologies',
+    icon: Zap,
+    gradient: 'from-indigo-500 to-purple-500',
+    services: [
+      'Blockchain',
+      'IoT Applications',
+      'AR/VR',
+      'Voice Tech',
+      'Cloud Native',
+      'Microservices',
+      'Serverless Apps',
+      'Edge Computing'
+    ]
+  }
 ];
 
+// ✅ FORM COMPONENT STARTS
 export default function CreationRequestForm() {
-  const [type, setType] = useState(TYPE_OPTIONS[0].value);
-  const [form, setForm] = useState({
-    name: '',
-    purpose: '',
-    platform: '',
-    features: '',
-    targetAudience: '',
-    phone: '',
-    details: '',
-  });
+  const [selectedCategory, setSelectedCategory] = useState(SERVICE_CATEGORIES[0].value);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
 
+  const [form, setForm] = useState({
+    name: '',
+    company: '',
+    email: '',
+    phone: '',
+    budget: '',
+    timeline: '',
+    description: '',
+    requirements: ''
+  });
+
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setType(e.target.value);
-    setForm({
-      name: '',
-      purpose: '',
-      platform: '',
-      features: '',
-      targetAudience: '',
-      phone: '',
-      details: '',
-    });
-    setSubmitted(false);
-    setError('');
+  const toggleService = (service: string) => {
+    setSelectedServices(prev =>
+      prev.includes(service)
+        ? prev.filter(s => s !== service)
+        : [...prev, service]
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (selectedServices.length === 0) {
+      setError('Please select at least one service.');
+      return;
+    }
+
     try {
-      const dataToSave = {
-        requestType: type,
-        projectName: form.name,
-        purpose: form.purpose,
-        platform: ['app', 'automation'].includes(type) ? form.platform : '',
-        features: form.features,
-        targetAudience: form.targetAudience,
-        phoneNumber: form.phone,
-        details: form.details,
-        createdAt: serverTimestamp(),
+      const payload = {
+        category: selectedCategory,
+        services: selectedServices,
+        ...form,
+        createdAt: serverTimestamp()
       };
-      await addDoc(collection(db, 'creationRequests'), dataToSave);
+
+      await addDoc(collection(db, 'creationRequests'), payload);
       setSubmitted(true);
+      setSelectedServices([]);
       setForm({
         name: '',
-        purpose: '',
-        platform: '',
-        features: '',
-        targetAudience: '',
+        company: '',
+        email: '',
         phone: '',
-        details: '',
+        budget: '',
+        timeline: '',
+        description: '',
+        requirements: ''
       });
     } catch {
-      setError('Something went wrong. Please try again.');
-      setSubmitted(false);
+      setError('Something went wrong. Try again.');
     }
   };
 
+  const currentCat = SERVICE_CATEGORIES.find(c => c.value === selectedCategory)!;
+
   return (
-    <section className="py-10 px-4 min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white text-gray-900">
-      <div className="w-full max-w-4xl mx-auto bg-white/90 rounded-2xl p-6 sm:p-12 shadow-2xl border border-[#1EB8F345]">
-        <h2 className="text-3xl font-bold mb-4 text-center bg-gradient-to-r from-[#1EB8F3] via-[#00AEEF] to-[#0059FF] bg-clip-text text-transparent tracking-wide">
-          Request Your Digital Solution
-        </h2>
-        <p className="text-center text-slate-700 mb-10 max-w-xl mx-auto">
-          Looking for a website, app, or something custom? Tell us your vision — our expert team will guide you from idea to launch!
-        </p>
-        {/* Type Selection */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
-          {TYPE_OPTIONS.map((opt) => (
-            <label
-              key={opt.value}
-              className={`flex flex-col items-center justify-center px-5 py-4 rounded-xl border cursor-pointer transition text-center text-base font-medium shadow-sm
-                ${type === opt.value
-                  ? 'bg-gradient-to-r from-[#1EB8F3] to-[#0059FF] text-white border-blue-700 shadow-lg scale-105'
-                  : 'bg-white text-gray-700 border-slate-200 hover:border-blue-400 hover:shadow-lg hover:scale-105'
-                }`}
-              style={{ minHeight: '7.5rem' }}
-              title={opt.desc}
-              tabIndex={0}
-            >
-              <input
-                type="radio"
-                name="type"
-                value={opt.value}
-                checked={type === opt.value}
-                onChange={handleTypeChange}
-                className="sr-only"
-              />
-              <span className={`text-lg font-semibold mb-1 ${type === opt.value ? 'text-white' : 'text-blue-800'} transition`}>
-                {opt.label}
-              </span>
-              <small className={`mt-1 text-sm ${type === opt.value ? 'text-blue-100' : 'text-slate-400'}`}>
-                {opt.desc}
-              </small>
-            </label>
-          ))}
-        </div>
-
-        {submitted ? (
-          <div className="p-8 bg-gradient-to-r from-green-500 to-blue-400 rounded-lg shadow-lg text-white text-center text-xl font-semibold">
-            Thanks for submitting! Our team will contact you soon.
+    <section className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-slate-900 py-16 px-4 flex justify-center">
+      
+      {/* ✅ MAIN CARD */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="w-full max-w-6xl mx-auto bg-gray-800/40 border border-gray-700/40 backdrop-blur-md rounded-3xl shadow-2xl relative z-10 p-8"
+      >
+        {/* ✅ HEADER */}
+        {!submitted && (
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-6xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
+              Start Your Digital Journey
+            </h2>
+            <p className="text-gray-300 mt-4 max-w-2xl mx-auto">
+              Tell us what you want to build — we create powerful digital products
+            </p>
           </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-7">
-            <div>
-              <label className="block mb-2 font-semibold text-slate-700">
-                {type === 'website'
-                  ? 'Website Name'
-                  : type === 'app'
-                  ? 'App Name'
-                  : type === 'automation'
-                  ? 'Automation Tool Name'
-                  : type === 'ai'
-                  ? 'AI/ML Solution Name'
-                  : type === 'product'
-                  ? 'Product Name'
-                  : 'Project Name'}
-              </label>
-              <input
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                required
-                placeholder="Project Name"
-                className="w-full rounded-md border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300"
-              />
+        )}
+
+        {/* ✅ SUCCESS MESSAGE */}
+        {submitted && (
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="p-12 bg-green-500/20 border border-green-500/30 rounded-2xl text-center text-white shadow-xl"
+          >
+            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-green-500 to-cyan-500 rounded-full flex items-center justify-center">
+              <svg className="w-10 h-10" viewBox="0 0 24 24" stroke="currentColor">
+                <path d="M5 13l4 4L19 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </div>
+            <h3 className="text-2xl font-bold mb-3">Request Submitted!</h3>
+            <p className="text-gray-200">
+              Our team will contact you within 24 hours.
+            </p>
+          </motion.div>
+        )}
+
+        {!submitted && (
+          <div className="space-y-10">
+
+            {/* ✅ CATEGORY SELECTION */}
             <div>
-              <label className="block mb-2 font-semibold text-slate-700">
-                Purpose
-              </label>
-              <input
-                name="purpose"
-                value={form.purpose}
-                onChange={handleChange}
-                required
-                placeholder="e.g. Sell products, automate tasks, launch SaaS"
-                className="w-full rounded-md border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300"
-              />
+              <h3 className="text-2xl font-bold text-white mb-6 text-center">
+                Choose Service Category
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {SERVICE_CATEGORIES.map(cat => {
+                  const Icon = cat.icon;
+                  const active = selectedCategory === cat.value;
+
+                  return (
+                    <motion.button
+                      key={cat.value}
+                      whileHover={{ scale: 1.03 }}
+                      onClick={() => setSelectedCategory(cat.value)}
+                      className={`p-5 rounded-2xl border transition-all duration-300 ${
+                        active
+                          ? `bg-gradient-to-br ${cat.gradient} border-transparent text-white shadow-xl`
+                          : 'bg-gray-700/40 border-gray-600 text-gray-300 hover:border-cyan-500/50'
+                      }`}
+                    >
+                      <Icon className="w-8 h-8 mb-3" />
+                      <span className="font-semibold text-sm">{cat.label}</span>
+                    </motion.button>
+                  );
+                })}
+              </div>
             </div>
 
-            {(type === 'app' || type === 'automation') && (
+            {/* ✅ FORM BODY */}
+            <div className="grid lg:grid-cols-2 gap-10">
+
+              {/* ✅ SERVICES LIST */}
               <div>
-                <label className="block mb-2 font-semibold text-slate-700">
-                  Platform
-                </label>
-                <select
-                  name="platform"
-                  value={form.platform}
+                <h3 className="text-2xl font-bold text-white mb-4">
+                  Select Services
+                </h3>
+
+                <div className="space-y-3 max-h-96 overflow-y-auto custom-scroll">
+                  {currentCat.services.map(service => {
+                    const checked = selectedServices.includes(service);
+
+                    return (
+                      <motion.label
+                        key={service}
+                        whileHover={{ scale: 1.01, backgroundColor: "rgba(6,182,212,0.06)" }}
+                        className={`flex items-center p-4 rounded-xl border cursor-pointer transition-all ${
+                          checked
+                            ? 'bg-cyan-500/15 border-cyan-500 text-cyan-400'
+                            : 'bg-gray-700/20 border-gray-600 text-gray-300'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleService(service)}
+                          className="mr-3 accent-cyan-500"
+                        />
+                        {service}
+                      </motion.label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* ✅ PROJECT DETAILS */}
+              <form onSubmit={handleSubmit} className="space-y-6">
+
+                {/* INPUT ROW 1 */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <TextInput label="Project Name *" name="name" value={form.name} onChange={handleChange} required />
+                  <TextInput label="Company / Organization" name="company" value={form.company} onChange={handleChange} />
+                </div>
+
+                {/* INPUT ROW 2 */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <TextInput label="Email Address *" name="email" type="email" required value={form.email} onChange={handleChange} />
+                  <TextInput label="Phone Number *" name="phone" required value={form.phone} onChange={handleChange} />
+                </div>
+
+                {/* SELECT ROW */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <SelectInput label="Estimated Budget" name="budget" value={form.budget} onChange={handleChange} options={[
+                    "1k-5k",
+                    "5k-15k",
+                    "15k-50k",
+                    "50k+",
+                    "Custom Quote"
+                  ]} />
+
+                  <SelectInput label="Timeline" name="timeline" value={form.timeline} onChange={handleChange} options={[
+                    "1-2 months",
+                    "3-6 months",
+                    "6-12 months",
+                    "12+ months",
+                    "Flexible"
+                  ]} />
+                </div>
+
+                {/* DESCRIPTION */}
+                <TextArea
+                  label="Project Description *"
+                  name="description"
+                  value={form.description}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-md border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  rows={3}
+                />
+
+                <TextArea
+                  label="Specific Requirements"
+                  name="requirements"
+                  value={form.requirements}
+                  onChange={handleChange}
+                  rows={2}
+                />
+
+                {/* ERROR */}
+                {error && (
+                  <p className="text-red-400 text-center p-3 bg-red-400/10 rounded-xl border border-red-400/20">
+                    {error}
+                  </p>
+                )}
+
+                {/* SUBMIT */}
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  type="submit"
+                  className="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-lg rounded-xl shadow-xl"
                 >
-                  <option value="">Select platform</option>
-                  <option value="iOS">iOS</option>
-                  <option value="Android">Android</option>
-                  <option value="Desktop">Desktop</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-            )}
+                  Submit Request
+                </motion.button>
 
-            <div>
-              <label className="block mb-2 font-semibold text-slate-700">
-                Key Features / Requirements
-              </label>
-              <input
-                name="features"
-                value={form.features}
-                onChange={handleChange}
-                required
-                placeholder="e.g. Payments, AI, chat, admin panel"
-                className="w-full rounded-md border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300"
-              />
-            </div>
-            <div>
-              <label className="block mb-2 font-semibold text-slate-700">
-                Target Audience
-              </label>
-              <input
-                name="targetAudience"
-                value={form.targetAudience}
-                onChange={handleChange}
-                required
-                placeholder="e.g. Students, enterprises, public"
-                className="w-full rounded-md border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300"
-              />
-            </div>
-            <div>
-              <label className="block mb-2 font-semibold text-slate-700">
-                Phone Number
-              </label>
-              <input
-                name="phone"
-                value={form.phone}
-                onChange={handleChange}
-                required
-                type="tel"
-                pattern="[0-9]{10,15}"
-                placeholder="Enter your phone number"
-                className="w-full rounded-md border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300"
-              />
-            </div>
-            <div>
-              <label className="block mb-2 font-semibold text-slate-700">
-                More Details (optional)
-              </label>
-              <textarea
-                name="details"
-                value={form.details}
-                onChange={handleChange}
-                rows={4}
-                placeholder="Describe your requirements, timelines, inspirations, or questions…"
-                className="w-full rounded-md border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"
-              />
+              </form>
             </div>
 
-            {error && <p className="text-red-600 text-center">{error}</p>}
-
-            <button
-              type="submit"
-              className="w-full py-3 bg-gradient-to-r from-[#1EB8F3] to-[#0059FF] text-white font-semibold rounded-lg shadow-lg hover:scale-105 hover:bg-gradient-to-r hover:from-[#0059FF] hover:to-[#1EB8F3] transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300"
-            >
-              Request{' '}
-              {TYPE_OPTIONS.find((opt) => opt.value === type)?.label ||
-                'Project'}
-            </button>
-          </form>
+          </div>
         )}
-      </div>
+      </motion.div>
+
+      {/* ✅ Scroll Styles */}
+      <style jsx>{`
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-thumb {
+          background: rgba(6,182,212,0.4);
+          border-radius: 100px;
+        }
+      `}</style>
+
     </section>
+  );
+}
+
+/* ✅ REUSABLE INPUT COMPONENTS — ultra-light */
+function TextInput({ label, ...props }: any) {
+  return (
+    <div>
+      <label className="block text-gray-300 mb-1">{label}</label>
+      <input
+        {...props}
+        className="w-full bg-gray-700/30 border border-gray-600 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 outline-none"
+      />
+    </div>
+  );
+}
+
+function SelectInput({ label, name, value, onChange, options }: any) {
+  return (
+    <div>
+      <label className="block text-gray-300 mb-1">{label}</label>
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="w-full bg-gray-700/30 border border-gray-600 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-cyan-500"
+      >
+        <option value="">Select</option>
+        {options.map((opt: string) => (
+          <option key={opt} value={opt}>{opt}</option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function TextArea({ label, rows = 3, ...props }: any) {
+  return (
+    <div>
+      <label className="block text-gray-300 mb-1">{label}</label>
+      <textarea
+        rows={rows}
+        {...props}
+        className="w-full bg-gray-700/30 border border-gray-600 rounded-xl px-4 py-3 text-white placeholder-gray-400 resize-none focus:ring-2 focus:ring-cyan-500 outline-none"
+      />
+    </div>
   );
 }
