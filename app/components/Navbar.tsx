@@ -13,11 +13,12 @@ import LoginModal from './LoginModal';
 const navLinks = [
   { id: '/', label: 'Home' },
   { id: '/blogs', label: 'Blogs' },
+  { id: '/services', label: 'Services' },
   { id: '/about', label: 'About Us' },
   { id: '/career', label: 'Careers' },
-  { id: '/whatwedo', label: 'What We Do' },
-  { id: '/contactUs', label: 'Contact' },
-  { id: '/compilers', label: 'Compilers' },
+{ id: '/talentprogram', label: 'Talent Program' },
+  { id: '/contactUs', label: 'Contact Us' },
+ 
 ];
 
 export default function Navbar() {

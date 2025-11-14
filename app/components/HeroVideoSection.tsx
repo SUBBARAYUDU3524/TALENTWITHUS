@@ -326,7 +326,14 @@ const HeroSection: React.FC = () => {
   }, [reducedMotion]);
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-black">
+   <div className="
+  relative 
+  min-h-screen       /* takes at least one screen height */
+  lg:h-screen        /* desktop keeps full-screen layout */
+  w-full 
+  overflow-hidden 
+  bg-black
+">
       {/* Layered Background */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-blue-950" />
@@ -366,15 +373,20 @@ const HeroSection: React.FC = () => {
       )}
 
       {/* Content */}
-      <div className="relative z-10 h-full w-full grid grid-cols-1 lg:grid-cols-2 px-6 md:px-12 lg:px-20">
+      <div className="relative z-10 h-full w-full grid grid-cols-1  lg:grid-cols-2 px-6 md:px-12 lg:px-20">
         {/* Left */}
-        <motion.div
-          ref={contentRef}
-          initial={{ opacity: 0, x: -40 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.9, ease: 'easeOut' }}
-          className="flex flex-col justify-center text-left space-y-6 will-change-transform"
-        >
+       <motion.div
+  ref={contentRef}
+  initial={{ opacity: 0, x: -40 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ duration: 0.9, ease: "easeOut" }}
+  className="
+    flex flex-col text-left space-y-6 will-change-transform
+    pt-20           /* extra top space on small screens */
+    md:pt-10        /* medium screens */
+    lg:justify-center lg:pt-0  /* normal behavior on large screens */
+  "
+>
           <motion.h1
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}

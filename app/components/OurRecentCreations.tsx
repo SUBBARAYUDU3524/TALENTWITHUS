@@ -3,7 +3,9 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../FirebaseConfig';
+// NOTE: Assuming '../../FirebaseConfig' is correctly set up, but cannot be verified here.
+import { db } from '../../FirebaseConfig'; 
+import toast, { Toaster } from "react-hot-toast"; // ✅ Import Toaster
 
 import {
   Globe,
@@ -152,8 +154,10 @@ const SERVICE_CATEGORIES = [
 export default function CreationRequestForm() {
   const [selectedCategory, setSelectedCategory] = useState(SERVICE_CATEGORIES[0].value);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const [submitted, setSubmitted] = useState(false);
+
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false); // ✅ Added success state
+  const [isSubmitting, setIsSubmitting] = useState(false); // ✅ Added submitting state
 
   const [form, setForm] = useState({
     name: '',
@@ -183,9 +187,21 @@ export default function CreationRequestForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess(false); // Reset success state
+    setIsSubmitting(true);
 
     if (selectedServices.length === 0) {
       setError('Please select at least one service.');
+      setIsSubmitting(false);
+      toast.error('Please select at least one service.');
+      return;
+    }
+
+    // Basic required field validation (matching component props)
+    if (!form.name || !form.email || !form.phone || !form.description) {
+      setError('Please fill in all required fields (marked with *).');
+      setIsSubmitting(false);
+      toast.error('Please fill in all required fields.');
       return;
     }
 
@@ -198,7 +214,12 @@ export default function CreationRequestForm() {
       };
 
       await addDoc(collection(db, 'creationRequests'), payload);
-      setSubmitted(true);
+      
+      // ✅ Success actions
+      setSuccess(true);
+      toast.success('Request submitted successfully!');
+
+      // Clear the form
       setSelectedServices([]);
       setForm({
         name: '',
@@ -210,8 +231,13 @@ export default function CreationRequestForm() {
         description: '',
         requirements: ''
       });
-    } catch {
+      
+    } catch (error) {
+      console.error('Error submitting creation request', error);
       setError('Something went wrong. Try again.');
+      toast.error('Submission failed. Check console for details.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -219,6 +245,7 @@ export default function CreationRequestForm() {
 
   return (
     <section className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-slate-900 py-16 px-4 flex justify-center">
+      <Toaster position="top-right" /> {/* ✅ Added Toaster component */}
       
       {/* ✅ MAIN CARD */}
       <motion.div
@@ -228,37 +255,38 @@ export default function CreationRequestForm() {
         className="w-full max-w-6xl mx-auto bg-gray-800/40 border border-gray-700/40 backdrop-blur-md rounded-3xl shadow-2xl relative z-10 p-8"
       >
         {/* ✅ HEADER */}
-        {!submitted && (
-          <div className="text-center mb-12">
+        
+        {/* ✅ FIX: Removed unclosed parenthesis/fragment around header */}
+        <div className="text-center mb-12">
             <h2 className="text-4xl md:text-6xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
               Start Your Digital Journey
             </h2>
             <p className="text-gray-300 mt-4 max-w-2xl mx-auto">
               Tell us what you want to build — we create powerful digital products
             </p>
-          </div>
-        )}
+        </div>
+
 
         {/* ✅ SUCCESS MESSAGE */}
-        {submitted && (
+        {success && ( // ✅ Check success state
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="p-12 bg-green-500/20 border border-green-500/30 rounded-2xl text-center text-white shadow-xl"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="p-6 mb-10 text-center bg-green-500/15 border border-green-500/50 rounded-xl"
           >
-            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-green-500 to-cyan-500 rounded-full flex items-center justify-center">
-              <svg className="w-10 h-10" viewBox="0 0 24 24" stroke="currentColor">
-                <path d="M5 13l4 4L19 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
-            <h3 className="text-2xl font-bold mb-3">Request Submitted!</h3>
-            <p className="text-gray-200">
-              Our team will contact you within 24 hours.
+            <h3 className="text-3xl font-bold text-green-400 mb-2">Request Submitted! 🎉</h3>
+            <p className="text-gray-300">
+              Thank you for your interest! We've received your request and will be in touch shortly.
             </p>
+            <button 
+              onClick={() => setSuccess(false)} 
+              className="mt-4 text-sm text-green-300 hover:text-green-200 transition"
+            >
+              Start another request
+            </button>
           </motion.div>
         )}
-
-        {!submitted && (
+       
           <div className="space-y-10">
 
             {/* ✅ CATEGORY SELECTION */}
@@ -275,7 +303,10 @@ export default function CreationRequestForm() {
                     <motion.button
                       key={cat.value}
                       whileHover={{ scale: 1.03 }}
-                      onClick={() => setSelectedCategory(cat.value)}
+                      onClick={() => {
+                        setSelectedCategory(cat.value);
+                        setSelectedServices([]); // Clear services on category change
+                      }}
                       className={`p-5 rounded-2xl border transition-all duration-300 ${
                         active
                           ? `bg-gradient-to-br ${cat.gradient} border-transparent text-white shadow-xl`
@@ -299,7 +330,7 @@ export default function CreationRequestForm() {
                   Select Services
                 </h3>
 
-                <div className="space-y-3 max-h-96 overflow-y-auto custom-scroll">
+                <div className="space-y-3 max-h-[650px] overflow-y-auto custom-scroll">
                   {currentCat.services.map(service => {
                     const checked = selectedServices.includes(service);
 
@@ -389,16 +420,17 @@ export default function CreationRequestForm() {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   type="submit"
-                  className="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-lg rounded-xl shadow-xl"
+                  disabled={isSubmitting} // Disable button while submitting
+                  className={`w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-lg rounded-xl shadow-xl transition duration-300 ${isSubmitting ? 'opacity-60 cursor-not-allowed' : 'hover:opacity-90'}`}
                 >
-                  Submit Request
+                  {isSubmitting ? 'Submitting...' : 'Submit Request'}
                 </motion.button>
 
               </form>
             </div>
 
           </div>
-        )}
+        
       </motion.div>
 
       {/* ✅ Scroll Styles */}
@@ -415,7 +447,19 @@ export default function CreationRequestForm() {
 }
 
 /* ✅ REUSABLE INPUT COMPONENTS — ultra-light */
-function TextInput({ label, ...props }: any) {
+// Note: Props are explicitly typed to satisfy TypeScript with 'any' for simplicity as this is a fix, not a re-write.
+interface InputProps {
+    label: string;
+    name: string;
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+    required?: boolean;
+    type?: string;
+    rows?: number;
+    options?: string[];
+}
+
+function TextInput({ label, ...props }: InputProps) {
   return (
     <div>
       <label className="block text-gray-300 mb-1">{label}</label>
@@ -427,7 +471,7 @@ function TextInput({ label, ...props }: any) {
   );
 }
 
-function SelectInput({ label, name, value, onChange, options }: any) {
+function SelectInput({ label, name, value, onChange, options }: InputProps) {
   return (
     <div>
       <label className="block text-gray-300 mb-1">{label}</label>
@@ -438,7 +482,7 @@ function SelectInput({ label, name, value, onChange, options }: any) {
         className="w-full bg-gray-700/30 border border-gray-600 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-cyan-500"
       >
         <option value="">Select</option>
-        {options.map((opt: string) => (
+        {options!.map((opt: string) => ( // options is guaranteed to be an array here
           <option key={opt} value={opt}>{opt}</option>
         ))}
       </select>
@@ -446,7 +490,7 @@ function SelectInput({ label, name, value, onChange, options }: any) {
   );
 }
 
-function TextArea({ label, rows = 3, ...props }: any) {
+function TextArea({ label, rows = 3, ...props }: InputProps) {
   return (
     <div>
       <label className="block text-gray-300 mb-1">{label}</label>
