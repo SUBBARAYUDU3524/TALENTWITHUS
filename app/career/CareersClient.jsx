@@ -141,7 +141,7 @@ export default function CareersClient() {
             </div>
 
             <div className="mt-6 text-sm text-gray-500">
-              We typically respond within 2-3 business days
+              We typically respond within 1-2 business days
             </div>
           </div>
         </div>

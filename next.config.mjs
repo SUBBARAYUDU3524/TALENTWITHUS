@@ -12,6 +12,7 @@ const nextConfig = {
         hostname: 'randomuser.me',
         pathname: '/**',
       },
+      
     ],
   },
 };

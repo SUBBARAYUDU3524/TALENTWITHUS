@@ -28,7 +28,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-, "app/components/CompanyBanner.tsx", "app/contactUs/page.jsx", "app/blogs/page.jsx", "app/about/page.jsx"  ],
+, "app/components/CompanyBanner.tsx", "app/contactUs/page.jsx", "app/blogs/page.jsx", "app/about/page.tsx"  ],
   "exclude": [
     "node_modules"
   ]
