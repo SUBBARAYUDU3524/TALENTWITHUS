@@ -1,114 +1,81 @@
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import LayoutWrapper from './components/LayoutWrapper';
 import { UserProvider } from './components/context/UserContext';
 import { Toaster } from 'react-hot-toast';
 
-// ✅ Load high-quality Google Fonts
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const inter = Inter({
+  variable: '--font-inter',
   subsets: ['latin'],
   display: 'swap',
+  weight: ['300', '400', '500', '600'],
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const jakarta = Plus_Jakarta_Sans({
+  variable: '--font-jakarta',
   subsets: ['latin'],
   display: 'swap',
+  weight: ['400', '500', '600', '700', '800'],
 });
 
-// ✅ GLOBAL METADATA (Professional, AdSense-friendly, SEO optimized)
 export const metadata = {
   metadataBase: new URL('https://www.talentwithus.com'),
-
   title: {
-    default: 'TalentWithUs — Empowering Innovation Through Technology',
+    default: 'TalentWithUs — Enterprise Digital Solutions & AI Technology',
     template: '%s | TalentWithUs',
   },
-
   description:
-    'TalentWithUs builds AI-driven digital solutions, connecting global talent with opportunities. We specialize in AI, automation, web & app development, cloud systems, and innovative digital products.',
-
-  keywords: [
-    'TalentWithUs',
-    'AI automation',
-    'Web development',
-    'App development',
-    'Chatbots',
-    'Cloud Solutions',
-    'Tech Startup',
-    'Software services',
-  ],
-
-  // ✅ Canonical URL (Important for SEO)
-  alternates: {
-    canonical: 'https://www.talentwithus.com',
-  },
-
+    'TalentWithUs builds world-class digital products — AI automation, web & app development, cloud infrastructure, and scalable platforms for modern businesses.',
+  keywords: ['TalentWithUs', 'AI automation', 'Web development', 'App development', 'Cloud Solutions', 'Tech Startup', 'Software services', 'Digital transformation'],
+  alternates: { canonical: 'https://www.talentwithus.com' },
   openGraph: {
-    title: 'TalentWithUs — Intelligent Digital Innovation',
-    description:
-      'AI-powered digital solutions, scalable engineering, and global talent empowerment.',
+    title: 'TalentWithUs — Enterprise Digital Solutions',
+    description: 'AI-powered digital solutions, scalable engineering, and global talent empowerment.',
     url: 'https://www.talentwithus.com',
     siteName: 'TalentWithUs',
     locale: 'en_US',
     type: 'website',
-    images: [
-      {
-        url: 'https://www.talentwithus.com/og-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'TalentWithUs - AI & Digital Innovation',
-      },
-    ],
+    images: [{ url: 'https://www.talentwithus.com/og-image.jpg', width: 1200, height: 630, alt: 'TalentWithUs' }],
   },
-
-  // ✅ Twitter SEO Metadata
   twitter: {
     card: 'summary_large_image',
-    title: 'TalentWithUs — AI & Digital Innovation',
-    description:
-      'We help businesses build modern, intelligent, AI-driven digital products.',
+    title: 'TalentWithUs — Enterprise Digital Solutions',
+    description: 'We help businesses build modern, intelligent digital products.',
     images: ['https://www.talentwithus.com/og-image.jpg'],
   },
-
-  // ✅ Robots & Googlebot configuration
-  robots: {
-    index: true,
-    follow: true,
-    nocache: false,
-    googleBot: {
-      index: true,
-      follow: true,
-      noimageindex: false,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-      'max-video-preview': -1,
-    },
-  },
-
-  // ✅ Theme color based on system preference
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
-  ],
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
 };
+
+export const viewport = {
+  themeColor: [{ media: '(prefers-color-scheme: dark)', color: '#030308' }, { media: '(prefers-color-scheme: light)', color: '#030308' }],
+};
+
+// Inline script runs before any CSS/JS — prevents flash of wrong theme
+const themeInitScript = `(function(){try{var t=localStorage.getItem('twu-theme');if(t==='light'){document.documentElement.classList.add('light');document.documentElement.classList.remove('dark');}else{document.documentElement.classList.add('dark');document.documentElement.classList.remove('light');}}catch(e){}})();`;
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-gray-900`}
-      >
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <head>
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
+      <body className={`${inter.variable} ${jakarta.variable} antialiased`}>
         <UserProvider>
           <LayoutWrapper>{children}</LayoutWrapper>
         </UserProvider>
-
         <Toaster
           position="top-center"
           toastOptions={{
-            duration: 3000,
-            style: { background: '#fff', color: '#333' },
+            duration: 3500,
+            style: {
+              background: 'var(--bg-card, #0C0C18)',
+              color: 'var(--text-primary, #F1F5F9)',
+              border: '1px solid var(--border-default, rgba(99,102,241,0.3))',
+              borderRadius: '10px',
+              fontSize: '14px',
+              fontFamily: 'var(--font-inter)',
+            },
           }}
         />
       </body>

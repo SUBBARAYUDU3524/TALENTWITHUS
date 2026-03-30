@@ -1,233 +1,66 @@
-"use client";
+'use client';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
 
-import { memo, useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import { useInView } from "react-intersection-observer";
-import Link from "next/link";
-
-import {
-  FaReact,
-  FaNodeJs,
-  FaPython,
-  FaJava,
-  FaHtml5,
-  FaCss3Alt,
-  FaGitAlt,
-  FaGithub,
-  FaAws,
-  FaDocker,
-} from "react-icons/fa";
-import {
-  SiNextdotjs,
-  SiTailwindcss,
-  SiMongodb,
-  SiExpress,
-  SiRedux,
-  SiTypescript,
-  SiGraphql,
-  SiFirebase,
-  SiMysql,
-  SiPostgresql,
-} from "react-icons/si";
-
-// ✅ Clean, curated color map for glow effects
-const iconColorMap = {
-  React: "#61DAFB",
-  "Next.js": "#ffffff",
-  "Tailwind CSS": "#38BDF8",
-  "Node.js": "#339933",
-  "Express.js": "#ffffff",
-  MongoDB: "#47A248",
-  Redux: "#764ABC",
-  TypeScript: "#3178C6",
-  Git: "#F05032",
-  GitHub: "#ffffff",
-  Java: "#007396",
-  Python: "#3776AB",
-  HTML5: "#E34F26",
-  CSS3: "#1572B6",
-  GraphQL: "#E10098",
-  Firebase: "#FFCA28",
-  MySQL: "#4479A1",
-  PostgreSQL: "#4169E1",
-  AWS: "#FF9900",
-  Docker: "#2496ED",
-};
-
-const techIconsRowOne = [
-  { icon: FaReact, label: "React" },
-  { icon: SiNextdotjs, label: "Next.js" },
-  { icon: SiTailwindcss, label: "Tailwind CSS" },
-  { icon: FaNodeJs, label: "Node.js" },
-  { icon: SiExpress, label: "Express.js" },
-  { icon: SiMongodb, label: "MongoDB" },
-  { icon: SiRedux, label: "Redux" },
-  { icon: SiTypescript, label: "TypeScript" },
-  { icon: FaGitAlt, label: "Git" },
-  { icon: FaGithub, label: "GitHub" },
+const row1 = [
+  { name: 'React', color: '#61DAFB' }, { name: 'Next.js', color: '#FFFFFF' }, { name: 'TypeScript', color: '#3178C6' },
+  { name: 'Node.js', color: '#339933' }, { name: 'Python', color: '#3776AB' }, { name: 'PostgreSQL', color: '#4169E1' },
+  { name: 'MongoDB', color: '#47A248' }, { name: 'Redis', color: '#DC382D' }, { name: 'GraphQL', color: '#E10098' },
+  { name: 'TailwindCSS', color: '#06B6D4' }, { name: 'Prisma', color: '#5A67D8' }, { name: 'Supabase', color: '#3ECF8E' },
+];
+const row2 = [
+  { name: 'AWS', color: '#FF9900' }, { name: 'Docker', color: '#2496ED' }, { name: 'Kubernetes', color: '#326CE5' },
+  { name: 'Firebase', color: '#FFCA28' }, { name: 'OpenAI', color: '#74AA9C' }, { name: 'LangChain', color: '#A1C4FD' },
+  { name: 'Vercel', color: '#888888' }, { name: 'GitHub', color: '#888888' }, { name: 'Figma', color: '#F24E1E' },
+  { name: 'Stripe', color: '#635BFF' }, { name: 'Terraform', color: '#7B42BC' }, { name: 'Flutter', color: '#54C5F8' },
 ];
 
-const techIconsRowTwo = [
-  { icon: FaJava, label: "Java" },
-  { icon: FaPython, label: "Python" },
-  { icon: FaHtml5, label: "HTML5" },
-  { icon: FaCss3Alt, label: "CSS3" },
-  { icon: SiGraphql, label: "GraphQL" },
-  { icon: SiFirebase, label: "Firebase" },
-  { icon: SiMysql, label: "MySQL" },
-  { icon: SiPostgresql, label: "PostgreSQL" },
-  { icon: FaAws, label: "AWS" },
-  { icon: FaDocker, label: "Docker" },
-];
-
-// ✅ Super-light marquee (only 1 transform animation)
-const MarqueeRow = ({ icons, reverse }: any) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [inViewRef, inView] = useInView({ threshold: 0.2 });
-
+function TechBadge({ name, color }: { name: string; color: string }) {
   return (
     <div
-      ref={inViewRef}
-      className="relative overflow-hidden py-4 select-none"
+      className="tech-badge flex items-center gap-2.5 px-5 py-3 rounded-xl mx-2 whitespace-nowrap select-none flex-shrink-0 cursor-default group"
+      style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', transition: 'all 0.25s ease' }}
+      onMouseEnter={(e) => { const el = e.currentTarget; el.style.borderColor = 'var(--border-default)'; el.style.transform = 'translateY(-1px)'; }}
+      onMouseLeave={(e) => { const el = e.currentTarget; el.style.borderColor = 'var(--border-subtle)'; el.style.transform = 'translateY(0)'; }}
     >
-      {/* Soft fade edges */}
-      <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-gray-900 to-transparent z-10" />
-      <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-gray-900 to-transparent z-10" />
-
-      <motion.div
-        className={`flex gap-12 whitespace-nowrap ${reverse ? "flex-row-reverse" : ""}`}
-        animate={inView ? { x: reverse ? ["0%", "-50%"] : ["-50%", "0%"] } : {}}
-        transition={{
-          duration: 35,
-          repeat: Infinity,
-          ease: "linear",
-        }}
-      >
-        {[...icons, ...icons].map(({ icon: Icon, label }, i) => {
-          const color = iconColorMap[label];
-          return (
-            <motion.div
-              key={i}
-              className="relative flex flex-col items-center"
-              whileHover={{
-                scale: 1.25,
-                y: -8,
-                transition: { type: "spring", stiffness: 300, damping: 20 },
-              }}
-            >
-              <div
-                className="p-4 rounded-2xl bg-gray-800/40 border border-gray-700/40 backdrop-blur-sm"
-                style={{
-                  color,
-                  boxShadow: `0 0 15px ${color}40`,
-                }}
-              >
-                <Icon className="text-5xl" />
-              </div>
-
-              <motion.span
-                className="absolute top-full mt-2 text-white text-sm px-2 py-1 rounded bg-gray-900/80 border border-gray-700"
-                initial={{ opacity: 0, y: 5 }}
-                whileHover={{ opacity: 1, y: 0 }}
-              >
-                {label}
-              </motion.span>
-            </motion.div>
-          );
-        })}
-      </motion.div>
+      <div className="w-2.5 h-2.5 rounded-full flex-shrink-0 transition-transform duration-200 group-hover:scale-125" style={{ background: color, boxShadow: `0 0 6px ${color}70` }} />
+      <span className="text-[13.5px] font-medium" style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-inter)' }}>{name}</span>
     </div>
   );
-};
+}
 
-const TechStackShowcase = () => {
-  const [ref, inView] = useInView({ threshold: 0.1 });
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
-
-  // ✅ Lightweight mouse glow (only updates 20 times/sec)
-  useEffect(() => {
-    let timeout: any;
-    const handler = (e: MouseEvent) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        setMouse({ x: e.clientX, y: e.clientY });
-      }, 16);
-    };
-    window.addEventListener("mousemove", handler);
-    return () => window.removeEventListener("mousemove", handler);
-  }, []);
-
+function Row({ items, reverse = false }: { items: typeof row1; reverse?: boolean }) {
+  const doubled = [...items, ...items];
   return (
-    <section
-      ref={ref}
-      className="relative bg-gradient-to-br from-gray-900 via-black to-slate-900 py-24 px-6 overflow-hidden"
-    >
-      {/* ✅ Soft animated BG glows (GPU-only) */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-purple-500/10 blur-3xl animate-pulse" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-cyan-500/10 blur-3xl animate-pulse delay-500" />
+    <div className="group flex overflow-hidden">
+      <div className={`flex ${reverse ? 'marquee-reverse' : 'marquee'} pause-on-hover`}>
+        {doubled.map((item, i) => <TechBadge key={`${item.name}-${i}`} name={item.name} color={item.color} />)}
+      </div>
+    </div>
+  );
+}
 
-        {/* Grid pattern */}
-        <div
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage:
-              "linear-gradient(#fff1 1px, transparent 1px),linear-gradient(90deg,#fff1 1px,transparent 1px)",
-            backgroundSize: "50px 50px",
-          }}
-        />
+export default function TechStackShowcase() {
+  const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
+  return (
+    <section className="relative py-[90px] sm:py-[110px] overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
+      <div className="absolute top-0 inset-x-0 h-px gradient-line" />
+      <div className="absolute left-0 top-0 bottom-0 w-24 sm:w-40 z-10 pointer-events-none" style={{ background: 'linear-gradient(90deg, var(--bg-primary), transparent)' }} />
+      <div className="absolute right-0 top-0 bottom-0 w-24 sm:w-40 z-10 pointer-events-none" style={{ background: 'linear-gradient(-90deg, var(--bg-primary), transparent)' }} />
+
+      <div className="max-w-[1280px] mx-auto px-5 sm:px-6">
+        <motion.div ref={ref} initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="text-center mb-12">
+          <div className="badge badge-emerald mb-5 mx-auto inline-flex"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />Tech Stack</div>
+          <h2 className="text-[clamp(26px,4vw,44px)] font-extrabold mb-4 leading-tight" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}>The Tools We Master</h2>
+          <p className="text-[15.5px] max-w-[420px] mx-auto" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-inter)' }}>We work with the best modern technologies to build future-proof products.</p>
+        </motion.div>
       </div>
 
-      {/* ✅ Mouse glow */}
-      <motion.div
-        className="pointer-events-none absolute w-80 h-80 rounded-full bg-cyan-500/10 blur-2xl"
-        animate={{ x: mouse.x - 150, y: mouse.y - 150 }}
-        transition={{ type: "tween", duration: 0.3 }}
-      />
-
-      <div className="max-w-6xl mx-auto relative z-10">
-        {/* ✅ Title */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-20"
-        >
-          <h2 className="text-4xl md:text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
-            Technologies We Master
-          </h2>
-
-          <p className="text-lg text-gray-300 mt-6 max-w-2xl mx-auto">
-            Building next-generation digital experiences using state-of-the-art
-            technologies.
-          </p>
-        </motion.div>
-
-        {/* ✅ Marquee Rows */}
-        <MarqueeRow icons={techIconsRowOne} />
-        <MarqueeRow icons={techIconsRowTwo} reverse />
-
-        {/* ✅ CTA */}
-        <motion.div
-          className="text-center mt-20"
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-        >
-          <Link href="/whatwedo">
-            <motion.button
-              whileHover={{
-                scale: 1.05,
-                boxShadow: "0 20px 40px rgba(6,182,212,0.25)",
-              }}
-              className="px-12 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold shadow-xl"
-            >
-              Explore Full Repository
-            </motion.button>
-          </Link>
-        </motion.div>
+      <div className="space-y-3.5">
+        <Row items={row1} />
+        <Row items={row2} reverse />
       </div>
     </section>
   );
-};
-
-export default memo(TechStackShowcase);
+}

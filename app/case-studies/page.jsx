@@ -1,379 +1,349 @@
-import React from 'react';
+'use client';
+import React, { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { 
-  FaArrowRight, 
-  FaChartLine, 
-  FaUsers, 
-  FaClock, 
-  FaIndustry, 
-  FaMobile, 
-  FaCloud, 
-  FaShieldAlt, 
-  FaLaptopCode, 
-  FaCheck,
-  FaCreditCard,
-  FaShoppingCart,
-  FaHeartbeat,
-  FaTshirt ,
-  FaDatabase,
-  FaServer,
-  FaGlobe,
-  FaLock
-} from 'react-icons/fa';
+import { motion } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
+import {
+  ArrowRight, BarChart3, Clock, CreditCard, Heart, Lock,
+  ShoppingCart, Cloud, TrendingUp, Smartphone, ChevronDown, ChevronUp,
+} from 'lucide-react';
 
 const caseStudies = [
   {
     id: 1,
-    title: "Digital Transformation for Financial Services",
-    client: "Global Finance Corp",
-    industry: "Banking & Finance",
-    duration: "6 Months",
-    results: "40% increase in digital engagement",
-    challenge: "Legacy systems hindering customer experience and operational efficiency in a competitive digital banking landscape.",
-    solution: "Implemented a modern microservices architecture with React frontend and cloud-native backend, enabling seamless digital banking experiences.",
-    outcome: "Enhanced customer satisfaction by 35% and reduced operational costs by 25% while improving system scalability.",
-    image: "/case-studies/finance-digital.jpg",
-    tags: ["Digital Transformation", "Cloud Migration", "React", "Microservices"],
-    metrics: [
-      { value: "40%", label: "Digital Engagement" },
-      { value: "35%", label: "Customer Satisfaction" },
-      { value: "25%", label: "Cost Reduction" }
-    ],
-    bgGradient: "from-blue-500 to-blue-700",
-    icon: <FaCreditCard className="w-8 h-8" />
+    title: 'Digital Transformation for Financial Services',
+    client: 'Global Finance Corp',
+    industry: 'Banking & Finance',
+    duration: '6 Months',
+    results: '40% increase in digital engagement',
+    challenge: 'Legacy systems hindering customer experience and operational efficiency in a competitive digital banking landscape.',
+    solution: 'Implemented a modern microservices architecture with React frontend and cloud-native backend, enabling seamless digital banking experiences.',
+    outcome: 'Enhanced customer satisfaction by 35% and reduced operational costs by 25% while improving system scalability.',
+    image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&q=80&fit=crop',
+    tags: ['Digital Transformation', 'Cloud Migration', 'React', 'Microservices'],
+    metrics: [{ value: '40%', label: 'Digital Engagement' }, { value: '35%', label: 'Client Satisfaction' }, { value: '25%', label: 'Cost Reduction' }],
+    icon: CreditCard,
+    color: '#6366F1',
   },
   {
     id: 2,
-    title: "E-commerce Platform Scaling Solution",
-    client: "StyleRetail Inc",
-    industry: "Retail & E-commerce",
-    duration: "4 Months",
-    results: "300% traffic handling capacity",
-    challenge: "Existing platform unable to handle seasonal traffic spikes, leading to downtime during peak sales periods.",
-    solution: "Developed a scalable cloud infrastructure with load balancing, CDN integration, and optimized database architecture.",
-    outcome: "Achieved zero downtime during Black Friday sales while handling 3x more concurrent users than previous year.",
-    image: "/case-studies/ecommerce-scaling.jpg",
-    tags: ["Scalability", "Cloud Infrastructure", "Performance", "E-commerce"],
-    metrics: [
-      { value: "300%", label: "Traffic Capacity" },
-      { value: "0", label: "Downtime" },
-      { value: "60%", label: "Faster Load Times" }
-    ],
-    bgGradient: "from-green-500 to-green-700",
-    icon: <FaShoppingCart className="w-8 h-8" />
+    title: 'E-commerce Platform Scaling Solution',
+    client: 'StyleRetail Inc',
+    industry: 'Retail & E-commerce',
+    duration: '4 Months',
+    results: '300% traffic handling capacity',
+    challenge: 'Existing platform unable to handle seasonal traffic spikes, leading to downtime during peak sales periods.',
+    solution: 'Developed a scalable cloud infrastructure with load balancing, CDN integration, and optimised database architecture.',
+    outcome: 'Achieved zero downtime during Black Friday sales while handling 3× more concurrent users than the previous year.',
+    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80&fit=crop',
+    tags: ['Scalability', 'Cloud Infrastructure', 'Performance', 'E-commerce'],
+    metrics: [{ value: '300%', label: 'Traffic Capacity' }, { value: '0', label: 'Downtime Hours' }, { value: '60%', label: 'Faster Load Time' }],
+    icon: ShoppingCart,
+    color: '#10B981',
   },
   {
     id: 3,
-    title: "Healthcare Data Management System",
-    client: "MediCare Solutions",
-    industry: "Healthcare",
-    duration: "8 Months",
-    results: "HIPAA compliant data handling",
-    challenge: "Need for secure, compliant patient data management while improving accessibility for healthcare providers.",
-    solution: "Built a secure healthcare platform with end-to-end encryption, audit trails, and HIPAA-compliant data storage.",
-    outcome: "Streamlined patient data access for providers while maintaining highest security standards and regulatory compliance.",
-    image: "/case-studies/healthcare-data.jpg",
-    tags: ["Healthcare", "Security", "Compliance", "Data Management"],
-    metrics: [
-      { value: "100%", label: "HIPAA Compliance" },
-      { value: "50%", label: "Faster Data Access" },
-      { value: "99.9%", label: "System Uptime" }
-    ],
-    bgGradient: "from-purple-500 to-purple-700",
-    icon: <FaHeartbeat className="w-8 h-8" />
+    title: 'Healthcare Data Management System',
+    client: 'MediCare Solutions',
+    industry: 'Healthcare',
+    duration: '8 Months',
+    results: 'HIPAA-compliant data handling',
+    challenge: 'Need for secure, compliant patient data management while improving accessibility for healthcare providers.',
+    solution: 'Built a secure healthcare platform with end-to-end encryption, audit trails, and HIPAA-compliant data storage.',
+    outcome: 'Streamlined patient data access for providers while maintaining highest security standards and regulatory compliance.',
+    image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80&fit=crop',
+    tags: ['Healthcare', 'Security', 'Compliance', 'Data Management'],
+    metrics: [{ value: '100%', label: 'HIPAA Compliance' }, { value: '50%', label: 'Faster Data Access' }, { value: '99.9%', label: 'System Uptime' }],
+    icon: Heart,
+    color: '#F472B6',
   },
   {
     id: 4,
-    title: "Mobile-First Retail Experience",
-    client: "UrbanStyle Brands",
-    industry: "Fashion Retail",
-    duration: "5 Months",
-    results: "200% mobile conversion growth",
-    challenge: "Declining mobile sales due to poor user experience and slow performance on mobile devices.",
-    solution: "Created a Progressive Web App (PWA) with optimized mobile experience, offline capabilities, and push notifications.",
-    outcome: "Significantly improved mobile conversion rates and customer retention while reducing bounce rates.",
-    image: "/case-studies/mobile-retail.jpg",
-    tags: ["Mobile First", "PWA", "User Experience", "Retail"],
-    metrics: [
-      { value: "200%", label: "Mobile Conversion" },
-      { value: "45%", label: "Lower Bounce Rate" },
-      { value: "3.5x", label: "Faster Load Time" }
-    ],
-    bgGradient: "from-orange-500 to-orange-700",
-    icon: <FaTshirt  className="w-8 h-8" />
+    title: 'Mobile-First Retail Experience',
+    client: 'UrbanStyle Brands',
+    industry: 'Fashion Retail',
+    duration: '5 Months',
+    results: '200% mobile conversion growth',
+    challenge: 'Declining mobile sales due to poor user experience and slow performance on mobile devices.',
+    solution: 'Created a Progressive Web App (PWA) with optimised mobile experience, offline capabilities, and push notifications.',
+    outcome: 'Significantly improved mobile conversion rates and customer retention while reducing bounce rates.',
+    image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&q=80&fit=crop',
+    tags: ['Mobile First', 'PWA', 'User Experience', 'Retail'],
+    metrics: [{ value: '200%', label: 'Mobile Conversion' }, { value: '45%', label: 'Lower Bounce Rate' }, { value: '3.5×', label: 'Faster Load' }],
+    icon: Smartphone,
+    color: '#F59E0B',
   },
   {
     id: 5,
-    title: "Enterprise Cloud Migration",
-    client: "TechInnovate Solutions",
-    industry: "Technology",
-    duration: "7 Months",
-    results: "60% infrastructure cost savings",
-    challenge: "On-premise infrastructure causing high maintenance costs and limited scalability for growing tech company.",
-    solution: "Migrated entire infrastructure to cloud with containerization, auto-scaling, and DevOps implementation.",
-    outcome: "Achieved significant cost savings while improving deployment speed and system reliability.",
-    image: "/case-studies/cloud-migration.jpg",
-    tags: ["Cloud Migration", "DevOps", "Containerization", "Infrastructure"],
-    metrics: [
-      { value: "60%", label: "Cost Savings" },
-      { value: "80%", label: "Faster Deployment" },
-      { value: "99.95%", label: "Uptime" }
-    ],
-    bgGradient: "from-cyan-500 to-cyan-700",
-    icon: <FaCloud className="w-8 h-8" />
+    title: 'Enterprise Cloud Migration',
+    client: 'TechInnovate Solutions',
+    industry: 'Technology',
+    duration: '7 Months',
+    results: '60% infrastructure cost savings',
+    challenge: 'On-premise infrastructure causing high maintenance costs and limited scalability for growing tech company.',
+    solution: 'Migrated entire infrastructure to cloud with containerisation, auto-scaling, and DevOps implementation.',
+    outcome: 'Achieved significant cost savings while improving deployment speed and system reliability.',
+    image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80&fit=crop',
+    tags: ['Cloud Migration', 'DevOps', 'Containerisation', 'Infrastructure'],
+    metrics: [{ value: '60%', label: 'Cost Savings' }, { value: '80%', label: 'Faster Deploy' }, { value: '99.95%', label: 'Uptime' }],
+    icon: Cloud,
+    color: '#06B6D4',
   },
   {
     id: 6,
-    title: "Cybersecurity Platform Implementation",
-    client: "SecureNet Systems",
-    industry: "Security",
-    duration: "5 Months",
-    results: "Zero security breaches",
-    challenge: "Increasing cybersecurity threats requiring robust protection systems for sensitive enterprise data.",
-    solution: "Implemented comprehensive security platform with real-time monitoring, threat detection, and automated response systems.",
-    outcome: "Maintained perfect security record while improving threat detection and response times significantly.",
-    image: "/case-studies/cybersecurity.jpg",
-    tags: ["Cybersecurity", "Threat Detection", "Monitoring", "Compliance"],
-    metrics: [
-      { value: "0", label: "Security Breaches" },
-      { value: "90%", label: "Faster Detection" },
-      { value: "100%", label: "Compliance" }
-    ],
-    bgGradient: "from-red-500 to-red-700",
-    icon: <FaLock className="w-8 h-8" />
-  }
+    title: 'Cybersecurity Platform Implementation',
+    client: 'SecureNet Systems',
+    industry: 'Security',
+    duration: '5 Months',
+    results: 'Zero security breaches',
+    challenge: 'Increasing cybersecurity threats requiring robust protection systems for sensitive enterprise data.',
+    solution: 'Implemented a comprehensive security platform with real-time monitoring, threat detection, and automated response systems.',
+    outcome: 'Maintained a perfect security record while improving threat detection and response times significantly.',
+    image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80&fit=crop',
+    tags: ['Cybersecurity', 'Threat Detection', 'Monitoring', 'Compliance'],
+    metrics: [{ value: '0', label: 'Security Breaches' }, { value: '90%', label: 'Faster Detection' }, { value: '100%', label: 'Compliance' }],
+    icon: Lock,
+    color: '#EF4444',
+  },
 ];
 
-const Page = () => {
+const stats = [
+  { value: '50+', label: 'Projects Completed', color: '#6366F1' },
+  { value: '95%', label: 'Client Satisfaction', color: '#10B981' },
+  { value: '40%', label: 'Average Growth', color: '#F59E0B' },
+  { value: '30+', label: 'Enterprise Clients', color: '#F472B6' },
+];
+
+function fadeUp(delay = 0) {
+  return {
+    initial: { opacity: 0, y: 24 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, margin: '-60px' },
+    transition: { duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] },
+  };
+}
+
+function CaseStudyCard({ study, index }) {
+  const [expanded, setExpanded] = useState(false);
+  const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.06 });
+  const Icon = study.icon;
+  const isEven = index % 2 === 0;
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-blue-900 to-indigo-900 text-white py-20">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            Case Studies
-          </h1>
-          <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto mb-8">
-            Discover how we've helped businesses transform their digital presence and achieve remarkable results
-          </p>
-          <div className="flex flex-wrap justify-center gap-6 mt-12">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-300">50+</div>
-              <div className="text-blue-200">Projects Completed</div>
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 40 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ delay: index * 0.06, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      className="rounded-[28px] overflow-hidden"
+      style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
+    >
+      <div className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}>
+
+        {/* Image side */}
+        <div className="relative w-full lg:w-[42%] h-[240px] sm:h-[300px] lg:h-auto min-h-[280px] flex-shrink-0 overflow-hidden">
+          <Image
+            src={study.image}
+            alt={study.title}
+            fill
+            className="object-cover transition-transform duration-700 hover:scale-105"
+          />
+          <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${study.color}30, rgba(3,3,8,0.60))` }} />
+          {/* Client badge */}
+          <div className="absolute top-5 left-5 flex items-center gap-2.5 px-4 py-2.5 rounded-2xl backdrop-blur-sm"
+            style={{ background: 'rgba(3,3,8,0.65)', border: '1px solid rgba(255,255,255,0.12)' }}>
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: study.color + '30' }}>
+              <Icon size={14} style={{ color: study.color }} />
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-300">95%</div>
-              <div className="text-blue-200">Client Satisfaction</div>
+            <div>
+              <div className="text-[11px] font-semibold text-white leading-none">{study.client}</div>
+              <div className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>{study.industry}</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-300">40%</div>
-              <div className="text-blue-200">Average Growth</div>
-            </div>
+          </div>
+          {/* Duration badge */}
+          <div className="absolute bottom-5 left-5 flex items-center gap-1.5 px-3 py-1.5 rounded-xl backdrop-blur-sm"
+            style={{ background: 'rgba(3,3,8,0.65)', border: '1px solid rgba(255,255,255,0.10)' }}>
+            <Clock size={11} style={{ color: study.color }} />
+            <span className="text-[11px] font-medium text-white/80">{study.duration}</span>
           </div>
         </div>
-      </section>
 
-      {/* Featured Case Studies */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Featured Case Studies
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Real-world solutions delivering measurable business impact across industries
-            </p>
+        {/* Content side */}
+        <div className="flex-1 p-7 sm:p-9 flex flex-col">
+          {/* Tags */}
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {study.tags.map(tag => (
+              <span key={tag} className="px-2.5 py-1 rounded-md text-[11px] font-medium"
+                style={{ background: study.color + '12', color: study.color, border: `1px solid ${study.color}25` }}>
+                {tag}
+              </span>
+            ))}
           </div>
 
-          <div className="space-y-12">
-            {caseStudies.map((study) => (
-              <div
-                key={study.id}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 group"
-              >
-                <div className="lg:flex">
-                  {/* Image Section - Left Side */}
-                  <div className={`lg:w-2/5 bg-gradient-to-br ${study.bgGradient} p-8 flex items-center justify-center relative overflow-hidden`}>
-                    <div className="absolute inset-0 bg-black/10"></div>
-                    <div className="relative z-10 text-center text-white">
-                      <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        {study.icon}
-                      </div>
-                      <h3 className="text-2xl font-bold mb-2">{study.client}</h3>
-                      <div className="font-semibold opacity-90">{study.industry}</div>
-                      <div className="mt-4 flex justify-center">
-                        <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
-                          <div className="text-sm opacity-90">Success Story</div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Decorative Elements */}
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
-                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-12 -translate-x-12"></div>
-                  </div>
+          <h3 className="text-[clamp(18px,2.2vw,24px)] font-extrabold leading-tight mb-3"
+            style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}>
+            {study.title}
+          </h3>
+          <p className="text-[13.5px] leading-relaxed mb-5 flex items-center gap-1.5 font-medium"
+            style={{ color: study.color, fontFamily: 'var(--font-inter)' }}>
+            <TrendingUp size={13} /> {study.results}
+          </p>
 
-                  {/* Content Section - Right Side */}
-                  <div className="lg:w-3/5 p-8">
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {study.tags.map((tag, index) => (
-                        <span
-                          key={index}
-                          className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-blue-600 transition-colors duration-300">
-                      {study.title}
-                    </h3>
-
-                    <div className="grid md:grid-cols-3 gap-6 mb-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                          <FaClock className="w-5 h-5 text-green-600" />
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-900">Duration</div>
-                          <div className="text-gray-600">{study.duration}</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <FaChartLine className="w-5 h-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-900">Key Result</div>
-                          <div className="text-gray-600 font-medium">{study.results}</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                          <FaIndustry className="w-5 h-5 text-purple-600" />
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-900">Industry</div>
-                          <div className="text-gray-600">{study.industry}</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4 mb-6">
-                      <div>
-                        <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                          <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                          The Challenge
-                        </h4>
-                        <p className="text-gray-600 leading-relaxed">{study.challenge}</p>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          Our Solution
-                        </h4>
-                        <p className="text-gray-600 leading-relaxed">{study.solution}</p>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          Business Outcome
-                        </h4>
-                        <p className="text-gray-600 leading-relaxed">{study.outcome}</p>
-                      </div>
-                    </div>
-
-                    {/* Metrics */}
-                    <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6 border border-gray-200">
-                      <h4 className="font-semibold text-gray-900 mb-4 text-center">Key Metrics Achieved</h4>
-                      <div className="grid grid-cols-3 gap-4">
-                        {study.metrics.map((metric, index) => (
-                          <div key={index} className="text-center">
-                            <div className="text-2xl font-bold text-blue-600">{metric.value}</div>
-                            <div className="text-sm text-gray-600 font-medium">{metric.label}</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+          {/* Metrics row */}
+          <div className="grid grid-cols-3 gap-3 mb-5 p-4 rounded-[16px]" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)' }}>
+            {study.metrics.map(m => (
+              <div key={m.label} className="text-center">
+                <div className="text-[clamp(18px,2vw,24px)] font-extrabold" style={{ color: study.color, fontFamily: 'var(--font-jakarta)' }}>{m.value}</div>
+                <div className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-inter)' }}>{m.label}</div>
               </div>
+            ))}
+          </div>
+
+          {/* Expandable detail */}
+          <div className="flex-1">
+            <motion.div
+              initial={false}
+              animate={{ height: expanded ? 'auto' : 0, opacity: expanded ? 1 : 0 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="space-y-4 mb-5">
+                {[
+                  { dot: '#EF4444', label: 'The Challenge', text: study.challenge },
+                  { dot: '#6366F1', label: 'Our Solution', text: study.solution },
+                  { dot: '#10B981', label: 'Business Outcome', text: study.outcome },
+                ].map(item => (
+                  <div key={item.label}>
+                    <h4 className="text-[13px] font-bold mb-1.5 flex items-center gap-2"
+                      style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}>
+                      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: item.dot }} />
+                      {item.label}
+                    </h4>
+                    <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-inter)' }}>{item.text}</p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            <button
+              onClick={() => setExpanded(e => !e)}
+              className="flex items-center gap-1.5 text-[13px] font-semibold transition-colors"
+              style={{ color: study.color, fontFamily: 'var(--font-inter)' }}
+            >
+              {expanded ? <><ChevronUp size={14} /> Hide details</> : <><ChevronDown size={14} /> Read full story</>}
+            </button>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+export default function CaseStudiesPage() {
+  const [heroRef, heroInView] = useInView({ triggerOnce: true, threshold: 0.1 });
+
+  return (
+    <div style={{ background: 'var(--bg-primary)', minHeight: '100vh' }}>
+
+      {/* Hero */}
+      <section className="relative h-[65vh] min-h-[440px] flex items-center overflow-hidden">
+        <div className="absolute inset-0 scale-110">
+          <Image
+            src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1600&q=85&fit=crop"
+            alt="Case Studies"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(3,3,8,0.88) 0%, rgba(7,7,15,0.72) 55%, rgba(3,3,8,0.92) 100%)' }} />
+        </div>
+        <div className="absolute inset-0 grid-pattern opacity-15 pointer-events-none" />
+        <div ref={heroRef} className="relative z-10 max-w-[900px] mx-auto px-5 sm:px-6 text-center w-full">
+          <motion.div initial={{ opacity: 0, y: 32 }} animate={heroInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
+            <div className="badge badge-indigo mb-5 mx-auto inline-flex">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse inline-block" />
+              Client Success Stories
+            </div>
+            <h1 className="text-[clamp(30px,5.5vw,62px)] font-extrabold leading-[1.08] mb-5 text-white">
+              Real Results for <span className="gradient-text">Real Businesses</span>
+            </h1>
+            <p className="text-[17px] leading-relaxed max-w-[600px] mx-auto text-white/70">
+              Discover how we've helped companies across industries achieve measurable digital transformation and significant business growth.
+            </p>
+          </motion.div>
+        </div>
+        <div className="absolute bottom-0 inset-x-0 h-20" style={{ background: 'linear-gradient(to top, var(--bg-primary), transparent)' }} />
+      </section>
+
+      {/* Stats */}
+      <section className="py-16" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+        <div className="max-w-[1280px] mx-auto px-5 sm:px-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {stats.map((s, i) => (
+              <motion.div key={s.label} {...fadeUp(i * 0.08)} className="text-center">
+                <div className="text-[clamp(32px,5vw,50px)] font-extrabold mb-1" style={{ color: s.color, fontFamily: 'var(--font-jakarta)' }}>{s.value}</div>
+                <div className="text-[13.5px]" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-inter)' }}>{s.label}</div>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Enhanced CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
-          <div className="absolute top-0 right-0 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse animation-delay-2000"></div>
-          <div className="absolute bottom-0 left-1/2 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse animation-delay-4000"></div>
-        </div>
-        
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          {/* Success Icon */}
-          <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-            <FaCheck className="w-8 h-8 text-white" />
-          </div>
-          
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Ready to Write Your <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Success Story</span>?
-          </h2>
-          
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Join the ranks of successful businesses that have transformed their digital presence with our expert solutions. 
-            Let's create your next success story together.
-          </p>
-
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="text-3xl font-bold text-white mb-2">50+</div>
-              <div className="text-blue-200 font-medium">Successful Projects</div>
+      {/* Case Studies */}
+      <section className="py-[80px] sm:py-[100px]">
+        <div className="max-w-[1280px] mx-auto px-5 sm:px-6">
+          <motion.div {...fadeUp()} className="text-center mb-14">
+            <div className="badge badge-indigo mb-4 mx-auto inline-flex">
+              <BarChart3 size={12} /> Case Studies
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="text-3xl font-bold text-white mb-2">95%</div>
-              <div className="text-blue-200 font-medium">Client Satisfaction</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="text-3xl font-bold text-white mb-2">40%</div>
-              <div className="text-blue-200 font-medium">Average ROI</div>
-            </div>
-          </div>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link
-              href="/contactUs"
-              className="group bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold px-10 py-5 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-3xl inline-flex items-center gap-3 text-lg"
-            >
-              Start Your Project
-              <FaArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
-            </Link>
-            
-            <Link
-              href="/whatwedo"
-              className="group border-2 border-white/30 hover:border-white bg-white/5 hover:bg-white/10 backdrop-blur-sm text-white font-semibold px-8 py-5 rounded-2xl transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-3 text-lg"
-            >
-              Explore Services
-              <FaArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-            </Link>
-          </div>
-
-          {/* Trust Indicator */}
-          <div className="mt-10 pt-8 border-t border-white/20">
-            <p className="text-blue-200 text-sm font-medium">
-              Trusted by 100+ companies worldwide • 24/7 Support • 100% Satisfaction Guarantee
+            <h2 className="text-[clamp(22px,3.5vw,40px)] font-extrabold mb-4"
+              style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}>
+              Featured Success Stories
+            </h2>
+            <p className="text-[15px] max-w-[480px] mx-auto" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-inter)' }}>
+              Real-world solutions delivering measurable business impact across industries.
             </p>
+          </motion.div>
+
+          <div className="space-y-6">
+            {caseStudies.map((study, i) => (
+              <CaseStudyCard key={study.id} study={study} index={i} />
+            ))}
           </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="relative py-[80px] sm:py-[100px] overflow-hidden">
+        <div className="absolute inset-0">
+          <Image
+            src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1600&q=80&fit=crop"
+            alt="Start your project"
+            fill
+            className="object-cover"
+          />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(3,3,8,0.92), rgba(7,7,15,0.88))' }} />
+        </div>
+        <div className="relative z-10 max-w-[700px] mx-auto px-5 sm:px-6 text-center">
+          <motion.div {...fadeUp()}>
+            <h2 className="text-[clamp(24px,4vw,42px)] font-extrabold mb-5 text-white" style={{ fontFamily: 'var(--font-jakarta)' }}>
+              Ready to Write Your Success Story?
+            </h2>
+            <p className="text-[16px] mb-8 text-white/65" style={{ fontFamily: 'var(--font-inter)' }}>
+              Let's discuss your project and see how we can deliver results like these for your business.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/contactUs" className="btn-primary inline-flex items-center gap-2 justify-center">
+                Start Your Project <ArrowRight size={15} />
+              </Link>
+              <Link href="/services" className="btn-outline inline-flex items-center gap-2 justify-center">
+                Explore Services
+              </Link>
+            </div>
+          </motion.div>
         </div>
       </section>
     </div>
   );
-};
-
-export default Page;
+}

@@ -2,24 +2,54 @@
 
 import { signOut, User } from 'firebase/auth';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Loader2, LogOut, Menu, X } from 'lucide-react';
+import { Loader2, LogOut, Menu, Moon, Sun, X, Zap } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { auth } from '../../FirebaseConfig';
+import { useThemeContext } from '../context/ThemeContext';
 import LoginModal from './LoginModal';
 
 const navLinks = [
   { id: '/', label: 'Home' },
-  { id: '/blogs', label: 'Blogs' },
   { id: '/services', label: 'Services' },
-  { id: '/about', label: 'About Us' },
+  { id: '/about', label: 'About' },
+  { id: '/blogs', label: 'Blog' },
   { id: '/career', label: 'Careers' },
-{ id: '/talentprogram', label: 'Talent Program' },
-  { id: '/contactUs', label: 'Contact Us' },
- 
+  { id: '/contactUs', label: 'Contact' },
 ];
+
+function ThemeToggle() {
+  const { theme, toggleTheme } = useThemeContext();
+  const isDark = theme === 'dark';
+
+  return (
+    <motion.button
+      whileTap={{ scale: 0.9 }}
+      onClick={toggleTheme}
+      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      className="relative w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/50"
+      style={{
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border-default)',
+        color: 'var(--text-secondary)',
+      }}
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={isDark ? 'moon' : 'sun'}
+          initial={{ rotate: -90, opacity: 0, scale: 0.6 }}
+          animate={{ rotate: 0, opacity: 1, scale: 1 }}
+          exit={{ rotate: 90, opacity: 0, scale: 0.6 }}
+          transition={{ duration: 0.2 }}
+        >
+          {isDark ? <Moon size={15} /> : <Sun size={15} className="text-amber-500" />}
+        </motion.div>
+      </AnimatePresence>
+    </motion.button>
+  );
+}
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -27,298 +57,300 @@ export default function Navbar() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const router = useRouter();
+  const { theme } = useThemeContext();
 
-  // Manage auth state
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-    });
-    return () => unsubscribe();
+    const unsub = auth.onAuthStateChanged((u) => { setUser(u); setLoading(false); });
+    return () => unsub();
   }, []);
 
-  // console.log(user,"current user")
-
-  // Shadow on scroll effect
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', onScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Route change loader animation
-  useEffect(() => {
-    setIsNavigating(true);
-    const id = setTimeout(() => setIsNavigating(false), 400);
-    return () => clearTimeout(id);
-  }, [pathname]);
-
-  // Sign out handler
   const handleSignOut = useCallback(async () => {
     try {
       await signOut(auth);
       setUser(null);
       if (pathname.includes('/dashboard')) router.push('/');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
+    } catch (e) { console.error(e); }
   }, [pathname, router]);
 
-  // Close menu on outside click
   useEffect(() => {
-    const onClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setIsOpen(false);
     };
-    document.addEventListener('mousedown', onClickOutside);
-    return () => document.removeEventListener('mousedown', onClickOutside);
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Close menu on ESC key
   useEffect(() => {
     if (!isOpen) return;
-    const onEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsOpen(false);
-    };
-    window.addEventListener('keydown', onEsc);
-    return () => window.removeEventListener('keydown', onEsc);
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsOpen(false); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
   }, [isOpen]);
 
-  const linkClass = (linkId: string) =>
-    `px-3 py-2 rounded-md transition-all text-sm font-medium flex items-center ${
-      pathname === linkId || pathname.startsWith(`${linkId}/`)
-        ? 'text-[#039fe3]'
-        : 'text-black hover:text-[#039fe3]'
-    }`;
+  // Close on route change
+  useEffect(() => { setIsOpen(false); }, [pathname]);
+
+  // Lock body scroll when menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
+  const isActive = (id: string) =>
+    id === '/' ? pathname === '/' : pathname === id || pathname.startsWith(`${id}/`);
+
+  const isDark = theme === 'dark';
+
+  const navBg = scrolled
+    ? isDark
+      ? 'rgba(3,3,8,0.92)'
+      : 'rgba(247,248,252,0.92)'
+    : 'transparent';
+
+  const navBorder = scrolled
+    ? isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.08)'
+    : '1px solid transparent';
 
   return (
     <>
-      {/* Navigation progress bar */}
-      <AnimatePresence>
-        {isNavigating && (
-          <motion.div
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: '100%', opacity: 1 }}
-            exit={{ width: '100%', opacity: 0 }}
-            transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
-            className="fixed top-0 left-0 h-1 bg-gradient-to-r from-[#0056D2] via-[#007BFF] to-[#00A8FF] z-[100]"
-            aria-label="Page loading indicator"
-            role="status"
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Navbar */}
       <motion.header
-        initial={{ y: -100, opacity: 0 }}
+        initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
-        className={`fixed top-0 inset-x-0 z-50 bg-white/60 backdrop-blur transition-shadow ${
-          scrolled ? 'shadow-xl' : 'border-transparent'
-        }`}
-        style={{ willChange: 'transform, opacity' }}
+        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        className="fixed top-0 inset-x-0 z-50 transition-all duration-400"
+        style={{
+          background: navBg,
+          backdropFilter: scrolled ? 'blur(20px) saturate(180%)' : 'none',
+          borderBottom: navBorder,
+          boxShadow: scrolled ? '0 4px 40px rgba(0,0,0,0.15)' : 'none',
+        }}
         role="banner"
       >
         <div
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16"
+          className="max-w-[1280px] mx-auto px-5 sm:px-6 flex items-center justify-between h-[68px]"
           ref={menuRef}
         >
           {/* Logo */}
-          <Link
-            href="/"
-            aria-label="Go to home page"
-            className="flex items-center ml-10 rounded-md"
-          >
-            <Image
-              src="/talent-with-us-logo copy.png"
-              alt="Talent With Us Logo"
-              width={48}
-              height={48}
-              className="object-cover"
-              priority
-            />
+          <Link href="/" aria-label="TalentWithUs home" className="flex items-center gap-3 group flex-shrink-0">
+            <div className="relative w-9 h-9 rounded-xl overflow-hidden transition-all duration-300 group-hover:ring-2 group-hover:ring-indigo-500/40" style={{ boxShadow: '0 0 0 1px var(--border-default)' }}>
+              <Image src="/talent-with-us-logo copy.png" alt="TalentWithUs logo" fill className="object-cover" priority />
+            </div>
+            <span
+              className="text-[15px] font-bold tracking-tight hidden sm:block transition-colors"
+              style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}
+            >
+              TalentWithUs
+            </span>
           </Link>
 
           {/* Desktop Nav */}
-          <nav
-            className="hidden md:flex items-center space-x-2 lg:space-x-4"
-            aria-label="Main navigation"
-          >
+          <nav className="hidden lg:flex items-center gap-0.5" aria-label="Main navigation">
             {navLinks.map(({ id, label }) => (
               <Link
                 key={id}
                 href={id}
-                className={linkClass(id)}
-                aria-current={pathname === id ? 'page' : undefined}
-                tabIndex={0}
+                className="relative px-4 py-2 rounded-lg text-[13.5px] font-medium transition-all duration-200"
+                style={{
+                  color: isActive(id) ? 'var(--color-primary-l)' : 'var(--text-secondary)',
+                }}
+                onMouseEnter={(e) => { if (!isActive(id)) (e.currentTarget as HTMLAnchorElement).style.color = 'var(--text-primary)'; }}
+                onMouseLeave={(e) => { if (!isActive(id)) (e.currentTarget as HTMLAnchorElement).style.color = 'var(--text-secondary)'; }}
               >
                 {label}
+                {isActive(id) && (
+                  <motion.div
+                    layoutId="nav-pill"
+                    className="absolute inset-0 rounded-lg"
+                    style={{ background: isDark ? 'rgba(99,102,241,0.12)' : 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.20)' }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 40 }}
+                  />
+                )}
               </Link>
             ))}
           </nav>
 
-          {/* Desktop Right Buttons */}
-          <div className="hidden md:flex items-center space-x-3 mr-6">
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              className="px-4 py-2 bg-gradient-to-r from-[#00AEEF] to-[#0052CC] text-white rounded-md font-medium text-sm shadow-lg transition-all cursor-pointer"
-              onClick={() => router.push('/contactUs')}
-            >
-              Book Consultation
-            </motion.button>
+          {/* Right actions */}
+          <div className="hidden lg:flex items-center gap-2.5">
+            <ThemeToggle />
 
             {!loading ? (
               user ? (
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-2">
                   <Link
                     href="/dashboard"
-                    aria-label="Go to dashboard"
-                    className="flex items-center space-x-2 rounded-md cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-white text-sm font-bold hover:ring-2 hover:ring-indigo-400/50 transition-all"
+                    aria-label="Dashboard"
                   >
-                    <div className="h-8 w-8 rounded-full hover:scale-110 transition-all bg-gradient-to-r from-[#00AEEF] to-[#0052CC] flex items-center justify-center text-white font-bold text-sm cursor-pointer select-none">
-                      {user.displayName?.charAt(0) || 'U'}
-                    </div>
+                    {user.displayName?.charAt(0).toUpperCase() || 'U'}
                   </Link>
                   <button
                     onClick={handleSignOut}
+                    className="p-2 rounded-lg transition-all duration-200"
+                    style={{ color: 'var(--text-muted)' }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = '#F87171'; (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.08)'; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)'; (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
                     aria-label="Sign out"
-                    className="p-2 rounded-full hover:bg-red-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    <LogOut className="h-5 w-5 text-red-600 hover:text-red-700 cursor-pointer transition-colors" />
+                    <LogOut size={14} />
                   </button>
                 </div>
               ) : (
                 <button
                   onClick={() => setIsLoginModalOpen(true)}
-                  className="px-4 py-2 border border-primary text-primary rounded-md font-medium text-sm hover:bg-accent/50 transition-colors"
+                  className="px-4 py-2 text-[13.5px] font-medium transition-colors duration-200"
+                  style={{ color: 'var(--text-secondary)' }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)'; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)'; }}
                 >
-                  Sign In
+                  Sign in
                 </button>
               )
             ) : (
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              <Loader2 className="w-4 h-4 animate-spin" style={{ color: 'var(--text-muted)' }} />
             )}
+
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => router.push('/contactUs')}
+              className="flex items-center gap-2 px-5 py-[9px] rounded-[9px] text-[13.5px] font-semibold text-white"
+              style={{ background: 'linear-gradient(135deg,#6366F1,#4F46E5)', boxShadow: '0 4px 18px rgba(99,102,241,0.38)' }}
+            >
+              <Zap size={13} className="fill-current" />
+              Get Started
+            </motion.button>
           </div>
 
-          {/* Mobile menu toggle */}
-          <div className="md:hidden flex items-center space-x-3 mr-4">
+          {/* Mobile right */}
+          <div className="lg:hidden flex items-center gap-2">
+            <ThemeToggle />
             <button
               onClick={() => setIsOpen((v) => !v)}
-              className="p-2 rounded-full hover:bg-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="p-2 rounded-xl transition-all duration-200"
+              style={{ color: 'var(--text-secondary)', background: isOpen ? 'var(--bg-card)' : 'transparent' }}
               aria-label={isOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={isOpen}
-              aria-controls="mobile-menu"
             >
-              {isOpen ? (
-                <X className="h-5 w-5 cursor-pointer" />
-              ) : (
-                <Menu className="h-5 w-5 cursor-pointer" />
-              )}
+              {isOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
-
-        {/* Mobile menu */}
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              id="mobile-menu"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-              className="md:hidden fixed inset-x-0 top-16 z-60 text-center bg-white/90 backdrop-blur-lg pt-8 pb-4 px-6 overflow-y-auto"
-              role="dialog"
-              aria-modal="true"
-              ref={menuRef}
-            >
-              <nav
-                className="flex flex-col space-y-1"
-                aria-label="Mobile navigation"
-              >
-                {navLinks.map((link) => (
-                  <button
-                    key={link.id}
-                    onClick={() => {
-                      setIsOpen(false);
-                      router.push(link.id);
-                    }}
-                    className={`w-full cursor-pointer rounded-md py-3 px-4 text-base font-medium transition hover:text-gray-700 focus:outline-none ${
-                      pathname === link.id
-                        ? 'bg-accent text-primary'
-                        : 'text-foreground'
-                    }`}
-                  >
-                    {link.label}
-                  </button>
-                ))}
-                <div className="pt-4 mt-2 border-t border-border/50">
-                  {!loading ? (
-                    user ? (
-                      <>
-                        <Link
-                          href="/dashboard"
-                          onClick={() => setIsOpen(false)}
-                          className="block rounded-md px-4 py-3 text-base font-medium text-foreground transition hover:text-gray-700 hover:bg-accent"
-                        >
-                          My Account
-                        </Link>
-                        <button
-                          onClick={() => {
-                            setIsOpen(false);
-                            handleSignOut();
-                          }}
-                          className="w-full cursor-pointer rounded-md px-4 py-3 text-base font-medium text-red-600 hover:text-red-400 transition"
-                        >
-                          Sign Out
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setIsOpen(false);
-                          setIsLoginModalOpen(true);
-                        }}
-                        className="w-full rounded-md px-4 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-accent transition"
-                        aria-label="Sign in"
-                      >
-                        Sign In
-                      </button>
-                    )
-                  ) : (
-                    <div className="flex justify-center px-4 py-3">
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                    </div>
-                  )}
-                </div>
-              </nav>
-              <div className="mt-8">
-                <motion.button
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full rounded-md bg-gradient-to-r from-[#00AEEF] to-[#0052CC] py-3 px-6 text-white font-medium shadow-lg hover:shadow-primary/30 transition"
-                  onClick={() => {
-                    setIsOpen(false);
-                    router.push('/contactUs');
-                  }}
-                >
-                  Book Free Consultation
-                </motion.button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </motion.header>
 
-      <LoginModal
-        isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
-      />
+      {/* Mobile Menu Overlay + Drawer */}
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40 lg:hidden"
+              style={{ background: isDark ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.25)', backdropFilter: 'blur(4px)' }}
+              onClick={() => setIsOpen(false)}
+            />
+
+            <motion.div
+              initial={{ x: '100%', opacity: 0.5 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: '100%', opacity: 0 }}
+              transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+              className="fixed top-0 right-0 bottom-0 z-50 w-[300px] max-w-full flex flex-col lg:hidden"
+              style={{
+                background: 'var(--bg-secondary)',
+                borderLeft: '1px solid var(--border-subtle)',
+                boxShadow: '-20px 0 60px rgba(0,0,0,0.3)',
+              }}
+            >
+              {/* Drawer header */}
+              <div
+                className="flex items-center justify-between px-5 h-[68px] flex-shrink-0"
+                style={{ borderBottom: '1px solid var(--border-subtle)' }}
+              >
+                <span className="text-[15px] font-semibold" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}>
+                  Menu
+                </span>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="p-2 rounded-xl transition-all duration-200"
+                  style={{ color: 'var(--text-muted)', background: 'var(--bg-card)' }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Nav links */}
+              <nav className="flex-1 overflow-y-auto px-4 py-5 space-y-1">
+                {navLinks.map(({ id, label }, i) => (
+                  <motion.button
+                    key={id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05, duration: 0.25 }}
+                    onClick={() => { router.push(id); setIsOpen(false); }}
+                    className="w-full text-left flex items-center justify-between px-4 py-3.5 rounded-xl text-[15px] font-medium transition-all duration-200"
+                    style={{
+                      color: isActive(id) ? 'var(--color-primary-l)' : 'var(--text-secondary)',
+                      background: isActive(id) ? isDark ? 'rgba(99,102,241,0.12)' : 'rgba(99,102,241,0.08)' : 'transparent',
+                      border: isActive(id) ? '1px solid rgba(99,102,241,0.20)' : '1px solid transparent',
+                    }}
+                  >
+                    {label}
+                    {isActive(id) && (
+                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                    )}
+                  </motion.button>
+                ))}
+              </nav>
+
+              {/* Drawer footer */}
+              <div className="px-4 pb-8 space-y-3 flex-shrink-0" style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '16px' }}>
+                {!loading && !user && (
+                  <button
+                    onClick={() => { setIsOpen(false); setIsLoginModalOpen(true); }}
+                    className="w-full py-3.5 rounded-xl text-[15px] font-medium transition-all duration-200"
+                    style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-default)', background: 'transparent' }}
+                  >
+                    Sign in
+                  </button>
+                )}
+                {user && (
+                  <button
+                    onClick={() => { setIsOpen(false); handleSignOut(); }}
+                    className="w-full py-3.5 rounded-xl text-[15px] font-medium text-red-400 hover:bg-red-500/10 transition-all"
+                  >
+                    Sign out
+                  </button>
+                )}
+                <button
+                  onClick={() => { setIsOpen(false); router.push('/contactUs'); }}
+                  className="w-full py-3.5 rounded-xl text-[15px] font-semibold text-white flex items-center justify-center gap-2"
+                  style={{ background: 'linear-gradient(135deg,#6366F1,#4F46E5)', boxShadow: '0 4px 20px rgba(99,102,241,0.35)' }}
+                >
+                  <Zap size={15} className="fill-current" />
+                  Get Started Free
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
     </>
   );
 }

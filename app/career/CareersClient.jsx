@@ -1,149 +1,135 @@
-
 'use client';
-
 import React from 'react';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
+import { Users, Zap, BookOpen, Globe, Briefcase, ArrowRight } from 'lucide-react';
 import OpenPositions from '../components/OpenPositions';
-import { useAuth } from '../context/AuthContext';
-import Link from 'next/link';
-import { 
-  FaHandsHelping, 
-  FaRocket, 
-  FaUserGraduate, 
-  FaGlobeAmericas,
-  FaBriefcase,
-  FaLock
-} from 'react-icons/fa';
-import HeroSection from '../components/careers/HeroSection';
 
-const culturePoints = [
-  {
-    icon: <FaHandsHelping className="text-blue-600 w-8 h-8" />,
-    title: 'Collaboration',
-    desc: 'We believe the best solutions come from working together.',
-  },
-  {
-    icon: <FaRocket className="text-blue-600 w-8 h-8" />,
-    title: 'Innovation',
-    desc: 'We encourage bold ideas and continuous improvement.',
-  },
-  {
-    icon: <FaUserGraduate className="text-blue-600 w-8 h-8" />,
-    title: 'Growth Mindset',
-    desc: 'Personal and professional development is part of every role.',
-  },
-  {
-    icon: <FaGlobeAmericas className="text-blue-600 w-8 h-8" />,
-    title: 'Diversity & Inclusion',
-    desc: 'We welcome team members from all backgrounds and experiences.',
-  },
+const values = [
+  { icon: Users, label: 'Collaboration', desc: 'The best solutions come from working together across disciplines.' },
+  { icon: Zap, label: 'Innovation', desc: 'We encourage bold ideas and continuous improvement every day.' },
+  { icon: BookOpen, label: 'Growth Mindset', desc: 'Personal and professional development is core to every role here.' },
+  { icon: Globe, label: 'Diversity & Inclusion', desc: 'We welcome talent from all backgrounds, cultures, and experiences.' },
 ];
 
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 24 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: '-60px' },
+  transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] },
+});
+
 export default function CareersClient() {
-  const { user, loading } = useAuth();
+  const [heroRef, heroInView] = useInView({ triggerOnce: true, threshold: 0.1 });
 
   return (
-    <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen">
-      {/* Hero Section */}
-      <HeroSection />
+    <div style={{ background: 'var(--bg-primary)', minHeight: '100vh' }}>
 
-      {/* Culture & Values Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+      {/* Hero with image */}
+      <section className="relative h-[68vh] min-h-[460px] flex items-center overflow-hidden">
+        <div className="absolute inset-0 scale-110">
+          <Image src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1600&q=85&fit=crop" alt="Join TalentWithUs" fill className="object-cover" priority />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(3,3,8,0.85) 0%, rgba(7,7,15,0.70) 55%, rgba(3,3,8,0.92) 100%)' }} />
+        </div>
+        <div className="absolute inset-0 grid-pattern opacity-15 pointer-events-none" />
+        <div ref={heroRef} className="relative z-10 max-w-[900px] mx-auto px-5 sm:px-6 text-center w-full">
+          <motion.div initial={{ opacity: 0, y: 32 }} animate={heroInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
+            <div className="badge badge-indigo mb-5 mx-auto inline-flex">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse inline-block" />
+              We're Hiring
+            </div>
+            <h1 className="text-[clamp(30px,5.5vw,62px)] font-extrabold leading-[1.08] mb-5 text-white">
+              Join <span className="gradient-text">TalentWithUs</span>
+            </h1>
+            <p className="text-[17px] leading-relaxed max-w-[600px] mx-auto text-white/70">
+              We're on a mission to build the next generation of digital products. Collaborate with brilliant minds, ship things you're proud of, and grow fast.
+            </p>
+          </motion.div>
+        </div>
+        <div className="absolute bottom-0 inset-x-0 h-20" style={{ background: 'linear-gradient(to top, var(--bg-primary), transparent)' }} />
+      </section>
+
+      {/* Values */}
+      <section className="py-[80px] sm:py-[100px]">
+        <div className="max-w-[1280px] mx-auto px-5 sm:px-6">
+          <motion.div {...fadeUp()} className="text-center mb-12">
+            <h2 className="text-[clamp(22px,3.5vw,40px)] font-extrabold mb-4"
+              style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}>
               Our Culture & Values
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              We foster an environment where innovation thrives and every team member can grow.
+            <p className="text-[15px] max-w-[480px] mx-auto" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-inter)' }}>
+              We foster an environment where innovation thrives and every person can grow.
             </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {culturePoints.map(({ icon, title, desc }) => (
-              <div
-                key={title}
-                className="bg-white rounded-xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:border-blue-300 group"
-              >
-                <div className="flex items-center justify-center w-12 h-12 bg-blue-50 rounded-lg mb-4 group-hover:bg-blue-100 transition-colors">
-                  {icon}
+          </motion.div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {values.map((v, i) => (
+              <motion.div key={v.label} {...fadeUp(i * 0.07)}
+                className="p-6 rounded-[20px] transition-all duration-300"
+                style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.30)'; e.currentTarget.style.transform = 'translateY(-3px)'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-subtle)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ background: 'rgba(99,102,241,0.12)' }}>
+                  <v.icon size={18} style={{ color: '#818CF8' }} />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  {title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {desc}
-                </p>
-              </div>
+                <h3 className="text-[15px] font-bold mb-2" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}>{v.label}</h3>
+                <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-inter)' }}>{v.desc}</p>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Open Positions Section */}
-      <section className="py-16 ">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full">
-                <FaBriefcase className="w-6 h-6 text-blue-600" />
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-                Open Positions
-              </h2>
+      {/* Open Positions */}
+      <section className="py-[80px] sm:py-[100px]" style={{ background: 'var(--bg-secondary)' }}>
+        <div className="max-w-[1280px] mx-auto px-5 sm:px-6">
+          <motion.div {...fadeUp()} className="text-center mb-12">
+            <div className="badge badge-indigo mb-4 mx-auto inline-flex">
+              <Briefcase size={12} /> Open Roles
             </div>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Explore current opportunities and find your perfect role in our growing team.
+            <h2 className="text-[clamp(22px,3.5vw,40px)] font-extrabold mb-4"
+              style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}>
+              Open Positions
+            </h2>
+            <p className="text-[15px] max-w-[480px] mx-auto" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-inter)' }}>
+              Explore current opportunities and find the role where you'll do your best work.
             </p>
-          </div>
-
-
-          {/* Open Positions Component */}
-          <div className="max-w-6xl mx-auto">
-            <OpenPositions />
-          </div>
+          </motion.div>
+          <OpenPositions />
         </div>
       </section>
 
-      {/* Quick Apply Section */}
-      <section className="py-16 bg-gradient-to-br">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 md:p-12 text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
-              <span className="text-2xl text-white">📩</span>
+      {/* Open application CTA */}
+      <section className="py-[80px] sm:py-[100px]">
+        <div className="max-w-[760px] mx-auto px-5 sm:px-6">
+          <motion.div {...fadeUp()} className="rounded-[28px] p-8 sm:p-12 text-center"
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ background: 'rgba(99,102,241,0.12)' }}>
+              <ArrowRight size={22} style={{ color: '#818CF8' }} />
             </div>
-            
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-              Don't See the Perfect Role?
+            <h2 className="text-[clamp(20px,3vw,32px)] font-extrabold mb-3"
+              style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}>
+              Don't see the right role?
             </h2>
-            
-            <p className="text-lg text-gray-600 mb-8 leading-relaxed max-w-2xl mx-auto">
-              We're always looking for talented individuals who share our passion for innovation. 
-              Send us your resume and tell us how you can contribute to our team.
+            <p className="text-[15px] leading-relaxed mb-8 max-w-[460px] mx-auto"
+              style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-inter)' }}>
+              We're always looking for talented people. Send your resume and tell us how you can contribute.
             </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <a
-                href="mailto:careers@talentwithus.com?subject=Open Application&body=Hi Team, I'm interested in exploring opportunities with Talent With Us. Here's a brief about myself..."
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
-              >
-                Send Open Application
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <a href="mailto:careers@talentwithus.com?subject=Open Application" className="btn-primary inline-flex items-center justify-center gap-2">
+                Send Open Application <ArrowRight size={14} />
               </a>
-              
-              <div className="text-sm text-gray-500">
-                or email directly to{' '}
-                <a
-                  href="mailto:info@talentwithus.com"
-                  className="text-blue-600 hover:text-blue-700 font-medium underline"
-                >
+              <span className="text-[13px] flex items-center justify-center" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-inter)' }}>
+                or email{' '}
+                <a href="mailto:info@talentwithus.com" className="ml-1 text-indigo-400 hover:text-indigo-300 transition-colors">
                   info@talentwithus.com
                 </a>
-              </div>
+              </span>
             </div>
-
-            <div className="mt-6 text-sm text-gray-500">
-              We typically respond within 1-2 business days
-            </div>
-          </div>
+            <p className="text-[12px] mt-5" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-inter)' }}>
+              We respond within 1–2 business days.
+            </p>
+          </motion.div>
         </div>
       </section>
     </div>

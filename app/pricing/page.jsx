@@ -1,426 +1,242 @@
-"use client"
+'use client';
 import React, { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { 
-  FaCheck, 
-  FaTimes, 
-  FaArrowRight, 
-  FaStar,
-  FaRocket,
-  FaUsers,
-  FaCrown,
-  FaShieldAlt ,
-  FaClock,
-  FaHeadset,
-  FaCog,
-  FaChartLine,
-  FaDatabase,
-  FaMobile,
-  FaCloud,
-  FaLock
-} from 'react-icons/fa';
+import { motion } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
+import { ArrowRight, Check, X, Zap, Users, Crown, Lock, Clock, Shield, Headphones, ChevronDown, ChevronUp } from 'lucide-react';
 
-const pricingPlans = [
+const plans = [
   {
-    id: 1,
-    name: "Starter",
-    description: "Perfect for small businesses and startups",
-    price: "$4,999",
-    duration: "project based",
-    popular: false,
-    icon: <FaRocket className="w-8 h-8" />,
-    gradient: "from-blue-500 to-blue-600",
+    name: 'Starter', desc: 'Perfect for small businesses and startups', price: '$4,999',
+    duration: 'project based', icon: Zap, color: '#6366F1',
     features: [
-      { name: "Responsive Website", included: true },
-      { name: "Up to 5 Pages", included: true },
-      { name: "Basic SEO Setup", included: true },
-      { name: "Contact Form", included: true },
-      { name: "1 Month Support", included: true },
-      { name: "E-commerce Functionality", included: false },
-      { name: "Custom Web Application", included: false },
-      { name: "Advanced Analytics", included: false },
-      { name: "Dedicated Project Manager", included: false },
-      { name: "Priority Support", included: false }
+      { name: 'Responsive Website', ok: true }, { name: 'Up to 5 Pages', ok: true },
+      { name: 'Basic SEO Setup', ok: true }, { name: 'Contact Form', ok: true },
+      { name: '1 Month Support', ok: true }, { name: 'E-commerce Functionality', ok: false },
+      { name: 'Custom Web Application', ok: false }, { name: 'Dedicated Project Manager', ok: false },
     ],
-    buttonText: "Get Started",
-    buttonVariant: "outline"
   },
   {
-    id: 2,
-    name: "Professional",
-    description: "Ideal for growing businesses with advanced needs",
-    price: "$12,999",
-    duration: "project based",
-    popular: true,
-    icon: <FaUsers className="w-8 h-8" />,
-    gradient: "from-purple-500 to-purple-600",
+    name: 'Professional', desc: 'Ideal for growing businesses with advanced needs', price: '$12,999',
+    duration: 'project based', icon: Users, color: '#A78BFA', popular: true,
     features: [
-      { name: "Custom Web Application", included: true },
-      { name: "Up to 15 Pages", included: true },
-      { name: "Advanced SEO Setup", included: true },
-      { name: "E-commerce Functionality", included: true },
-      { name: "3 Months Support", included: true },
-      { name: "Dedicated Project Manager", included: true },
-      { name: "API Integration", included: true },
-      { name: "Basic Analytics Dashboard", included: true },
-      { name: "Mobile App (Additional)", included: false },
-      { name: "Enterprise Security", included: false }
+      { name: 'Custom Web Application', ok: true }, { name: 'Up to 15 Pages', ok: true },
+      { name: 'Advanced SEO Setup', ok: true }, { name: 'E-commerce Functionality', ok: true },
+      { name: '3 Months Support', ok: true }, { name: 'Dedicated Project Manager', ok: true },
+      { name: 'API Integration', ok: true }, { name: 'Mobile App (Additional)', ok: false },
     ],
-    buttonText: "Choose Professional",
-    buttonVariant: "primary"
   },
   {
-    id: 3,
-    name: "Enterprise",
-    description: "Complete solutions for large organizations",
-    price: "Custom",
-    duration: "tailored to needs",
-    popular: false,
-    icon: <FaCrown className="w-8 h-8" />,
-    gradient: "from-orange-500 to-orange-600",
+    name: 'Enterprise', desc: 'Complete solutions for large organisations', price: 'Custom',
+    duration: 'tailored to needs', icon: Crown, color: '#F59E0B',
     features: [
-      { name: "Complex Web Applications", included: true },
-      { name: "Unlimited Pages", included: true },
-      { name: "Enterprise SEO Strategy", included: true },
-      { name: "Advanced E-commerce", included: true },
-      { name: "6 Months Support", included: true },
-      { name: "Dedicated Project Team", included: true },
-      { name: "Multiple API Integrations", included: true },
-      { name: "Advanced Analytics & Reporting", included: true },
-      { name: "Mobile App Development", included: true },
-      { name: "Enterprise-grade Security", included: true }
+      { name: 'Complex Web Applications', ok: true }, { name: 'Unlimited Pages', ok: true },
+      { name: 'Enterprise SEO Strategy', ok: true }, { name: 'Advanced E-commerce', ok: true },
+      { name: '6 Months Support', ok: true }, { name: 'Dedicated Project Team', ok: true },
+      { name: 'Mobile App Development', ok: true }, { name: 'Enterprise-grade Security', ok: true },
     ],
-    buttonText: "Contact Sales",
-    buttonVariant: "outline"
-  }
-];
-
-const services = [
-  {
-    name: "Web Development",
-    description: "Custom websites and web applications built with modern technologies",
-    startingAt: "$4,999",
-    icon: <FaCog className="w-6 h-6" />,
-    features: ["React/Next.js", "Responsive Design", "SEO Optimized", "Fast Performance"]
   },
-  {
-    name: "Mobile Development",
-    description: "Cross-platform mobile applications for iOS and Android",
-    startingAt: "$8,999",
-    icon: <FaMobile className="w-6 h-6" />,
-    features: ["React Native", "iOS & Android", "Offline Capability", "App Store Deployment"]
-  },
-  {
-    name: "E-commerce Solutions",
-    description: "Complete online store development with payment integration",
-    startingAt: "$6,999",
-    icon: <FaChartLine className="w-6 h-6" />,
-    features: ["Shopping Cart", "Payment Gateway", "Inventory Management", "Order Tracking"]
-  },
-  {
-    name: "Cloud & DevOps",
-    description: "Cloud infrastructure setup and deployment automation",
-    startingAt: "$3,999",
-    icon: <FaCloud className="w-6 h-6" />,
-    features: ["AWS/Azure/GCP", "CI/CD Pipeline", "Auto Scaling", "Monitoring"]
-  }
 ];
 
 const faqs = [
-  {
-    question: "What's included in the project price?",
-    answer: "All our project prices include design, development, testing, deployment, and a specified support period. We provide detailed breakdowns in our proposals."
-  },
-  {
-    question: "Do you offer ongoing maintenance?",
-    answer: "Yes, we offer flexible maintenance plans starting at $299/month for updates, security patches, and technical support."
-  },
-  {
-    question: "How long does a typical project take?",
-    answer: "Project timelines vary by complexity: Starter (4-6 weeks), Professional (8-12 weeks), Enterprise (12+ weeks). We provide detailed timelines in our proposals."
-  },
-  {
-    question: "Can we start with a smaller package and upgrade later?",
-    answer: "Absolutely! We design our solutions to be scalable. Many clients start with a smaller package and expand as their business grows."
-  },
-  {
-    question: "Do you provide hosting and domain services?",
-    answer: "We can help you set up hosting and domain services, which are billed separately based on your requirements and traffic needs."
-  }
+  { q: "What's included in the project price?", a: "Design, development, testing, deployment, and the specified support period. We provide detailed breakdowns in our proposals." },
+  { q: "Do you offer ongoing maintenance?", a: "Yes — flexible maintenance plans starting at $299/month for updates, security patches, and technical support." },
+  { q: "How long does a typical project take?", a: "Starter: 4–6 weeks · Professional: 8–12 weeks · Enterprise: 12+ weeks. We provide detailed timelines in proposals." },
+  { q: "Can we start with a smaller package and upgrade later?", a: "Absolutely. We design for scalability. Many clients start with Starter and expand as their business grows." },
 ];
 
-const Page = () => {
-  const [billingCycle, setBillingCycle] = useState('project');
+function fadeUp(delay = 0) {
+  return {
+    initial: { opacity: 0, y: 24 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, margin: '-50px' },
+    transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] },
+  };
+}
 
+function FAQ({ item }) {
+  const [open, setOpen] = useState(false);
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-blue-900 to-indigo-900 text-white py-20">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            Transparent Pricing
-          </h1>
-          <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto mb-8">
-            Custom solutions with clear, predictable pricing. No hidden fees, no surprises.
-          </p>
-          
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-300">50+</div>
-              <div className="text-blue-200">Projects Delivered</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-300">95%</div>
-              <div className="text-blue-200">On Budget Delivery</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-300">100%</div>
-              <div className="text-blue-200">Transparent Pricing</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Plans */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Project-Based Pricing
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Fixed-price projects with clear deliverables. Perfect for businesses that want predictable costs.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {pricingPlans.map((plan) => (
-              <div
-                key={plan.id}
-                className={`relative bg-white rounded-2xl shadow-lg border-2 ${
-                  plan.popular ? 'border-purple-500 shadow-2xl transform scale-105' : 'border-gray-200'
-                } transition-all duration-300 hover:shadow-xl`}
-              >
-                {/* Popular Badge */}
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <div className="bg-purple-500 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2">
-                      <FaStar className="w-4 h-4" />
-                      Most Popular
-                    </div>
-                  </div>
-                )}
-
-                {/* Header */}
-                <div className={`bg-gradient-to-r ${plan.gradient} p-8 text-white rounded-t-2xl text-center`}>
-                  <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    {plan.icon}
-                  </div>
-                  <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                  <p className="text-white/90 mb-4">{plan.description}</p>
-                  <div className="flex items-baseline justify-center gap-2">
-                    <span className="text-4xl font-bold">{plan.price}</span>
-                    <span className="text-white/80">/{plan.duration}</span>
-                  </div>
-                </div>
-
-                {/* Features */}
-                <div className="p-8">
-                  <ul className="space-y-4 mb-8">
-                    {plan.features.map((feature, index) => (
-                      <li key={index} className="flex items-start gap-3">
-                        {feature.included ? (
-                          <FaCheck className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                        ) : (
-                          <FaTimes className="w-5 h-5 text-gray-300 mt-0.5 flex-shrink-0" />
-                        )}
-                        <span className={feature.included ? "text-gray-700" : "text-gray-400"}>
-                          {feature.name}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* CTA Button */}
-                  <Link
-                    href="/contact"
-                    className={`w-full py-4 px-6 rounded-xl font-semibold text-center transition-all duration-300 ${
-                      plan.popular
-                        ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-lg hover:shadow-xl'
-                        : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl'
-                    } inline-flex items-center justify-center gap-2`}
-                  >
-                    {plan.buttonText}
-                    <FaArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Services Pricing */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Service-Specific Pricing
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Starting prices for specific services. Final costs depend on project requirements.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {services.map((service, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300"
-              >
-                <div className="text-blue-600 mb-4">
-                  {service.icon}
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{service.name}</h3>
-                <p className="text-gray-600 text-sm mb-4">{service.description}</p>
-                <div className="text-2xl font-bold text-blue-600 mb-4">
-                  Starting at {service.startingAt}
-                </div>
-                <ul className="space-y-2 mb-6">
-                  {service.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-center gap-2 text-sm text-gray-600">
-                      <FaCheck className="w-4 h-4 text-green-500" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/contact"
-                  className="w-full bg-gray-100 hover:bg-blue-600 hover:text-white text-gray-700 py-3 px-4 rounded-lg font-semibold text-center transition-all duration-300 inline-flex items-center justify-center gap-2"
-                >
-                  Get Quote
-                  <FaArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose Us */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Why Choose Our Pricing Model?
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FaLock className="w-8 h-8 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Fixed Pricing</h3>
-              <p className="text-gray-600">
-                No surprise costs. You know exactly what you're paying for upfront.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FaClock className="w-8 h-8 text-green-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Clear Timelines</h3>
-              <p className="text-gray-600">
-                Realistic project timelines with regular progress updates.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FaShieldAlt  className="w-8 h-8 text-purple-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Quality Guarantee</h3>
-              <p className="text-gray-600">
-                We stand behind our work with comprehensive testing and support.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FaHeadset className="w-8 h-8 text-orange-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Dedicated Support</h3>
-              <p className="text-gray-600">
-                Ongoing support and maintenance to keep your project running smoothly.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Frequently Asked Questions
-            </h2>
-            <p className="text-xl text-gray-600">
-              Get answers to common questions about our pricing and process
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            {faqs.map((faq, index) => (
-              <div key={index} className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">{faq.question}</h3>
-                <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      {/* <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Ready to Get Started?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Let's discuss your project requirements and provide you with a detailed, no-obligation quote.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/contact"
-              className="bg-white text-blue-600 hover:bg-blue-50 font-bold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg inline-flex items-center gap-3"
-            >
-              Get Free Quote
-              <FaArrowRight className="w-5 h-5" />
-            </Link>
-            <Link
-              href="/case-studies"
-              className="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-semibold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-3"
-            >
-              View Our Work
-              <FaArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-
-          <div className="mt-10 pt-8 border-t border-white/20">
-            <p className="text-blue-200 text-sm">
-              No hidden fees • Detailed proposals • Flexible payment options • 100% satisfaction guarantee
-            </p>
-          </div>
-        </div>
-      </section> */}
+    <div className="rounded-[16px] overflow-hidden" style={{ border: '1px solid var(--border-subtle)', background: 'var(--bg-card)' }}>
+      <button onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left"
+        style={{ color: 'var(--text-primary)' }}>
+        <span className="text-[14.5px] font-semibold" style={{ fontFamily: 'var(--font-jakarta)' }}>{item.q}</span>
+        {open ? <ChevronUp size={16} style={{ color: '#818CF8', flexShrink: 0 }} /> : <ChevronDown size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />}
+      </button>
+      <motion.div initial={false} animate={{ height: open ? 'auto' : 0, opacity: open ? 1 : 0 }}
+        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }} className="overflow-hidden">
+        <p className="px-6 pb-5 text-[13.5px] leading-relaxed" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-inter)' }}>{item.a}</p>
+      </motion.div>
     </div>
   );
-};
+}
 
-export default Page;
+export default function PricingPage() {
+  const [heroRef, heroInView] = useInView({ triggerOnce: true, threshold: 0.1 });
+
+  return (
+    <div style={{ background: 'var(--bg-primary)', minHeight: '100vh' }}>
+
+      {/* Hero */}
+      <section className="relative h-[60vh] min-h-[400px] flex items-center overflow-hidden">
+        <div className="absolute inset-0 scale-110">
+          <Image src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1600&q=85&fit=crop"
+            alt="Pricing" fill className="object-cover" priority />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(3,3,8,0.90) 0%, rgba(7,7,15,0.75) 55%, rgba(3,3,8,0.93) 100%)' }} />
+        </div>
+        <div className="absolute inset-0 grid-pattern opacity-15 pointer-events-none" />
+        <div ref={heroRef} className="relative z-10 max-w-[800px] mx-auto px-5 sm:px-6 text-center w-full">
+          <motion.div initial={{ opacity: 0, y: 32 }} animate={heroInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
+            <div className="badge badge-indigo mb-5 mx-auto inline-flex">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse inline-block" /> Transparent Pricing
+            </div>
+            <h1 className="text-[clamp(28px,5vw,58px)] font-extrabold leading-[1.08] mb-5 text-white">
+              Clear Pricing. <span className="gradient-text">No Surprises.</span>
+            </h1>
+            <p className="text-[16px] leading-relaxed max-w-[520px] mx-auto text-white/70">
+              Fixed-price projects with clear deliverables. You know exactly what you're paying for.
+            </p>
+          </motion.div>
+        </div>
+        <div className="absolute bottom-0 inset-x-0 h-20" style={{ background: 'linear-gradient(to top, var(--bg-primary), transparent)' }} />
+      </section>
+
+      {/* Plans */}
+      <section className="py-[80px] sm:py-[100px]">
+        <div className="max-w-[1280px] mx-auto px-5 sm:px-6">
+          <motion.div {...fadeUp()} className="text-center mb-14">
+            <h2 className="text-[clamp(22px,3.5vw,40px)] font-extrabold mb-4" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}>
+              Project-Based Pricing
+            </h2>
+            <p className="text-[15px] max-w-[460px] mx-auto" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-inter)' }}>
+              Fixed prices with clear deliverables. Perfect for predictable budgets.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-[1100px] mx-auto">
+            {plans.map((plan, i) => {
+              const Icon = plan.icon;
+              return (
+                <motion.div key={plan.name} {...fadeUp(i * 0.08)}
+                  className={`relative rounded-[24px] flex flex-col overflow-hidden ${plan.popular ? 'ring-2' : ''}`}
+                  style={{
+                    background: 'var(--bg-card)', border: '1px solid var(--border-subtle)',
+                    ...(plan.popular ? { ringColor: plan.color, boxShadow: `0 0 40px ${plan.color}20` } : {}),
+                  }}>
+                  {plan.popular && (
+                    <div className="absolute top-4 right-4 px-3 py-1 rounded-full text-[11px] font-bold text-white"
+                      style={{ background: plan.color }}>Most Popular</div>
+                  )}
+                  {/* Card header */}
+                  <div className="p-7 pb-6" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                    <div className="w-11 h-11 rounded-2xl flex items-center justify-center mb-4" style={{ background: plan.color + '18' }}>
+                      <Icon size={20} style={{ color: plan.color }} />
+                    </div>
+                    <h3 className="text-[18px] font-extrabold mb-1" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}>{plan.name}</h3>
+                    <p className="text-[13px] mb-5" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-inter)' }}>{plan.desc}</p>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-[clamp(28px,4vw,38px)] font-extrabold" style={{ color: plan.color, fontFamily: 'var(--font-jakarta)' }}>{plan.price}</span>
+                      <span className="text-[12px]" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-inter)' }}>/{plan.duration}</span>
+                    </div>
+                  </div>
+                  {/* Features */}
+                  <div className="p-7 flex flex-col flex-1">
+                    <ul className="space-y-3 mb-7 flex-1">
+                      {plan.features.map(f => (
+                        <li key={f.name} className="flex items-center gap-3 text-[13px]" style={{ fontFamily: 'var(--font-inter)' }}>
+                          {f.ok
+                            ? <Check size={14} style={{ color: '#34D399', flexShrink: 0 }} />
+                            : <X size={14} style={{ color: 'var(--text-muted)', flexShrink: 0, opacity: 0.4 }} />}
+                          <span style={{ color: f.ok ? 'var(--text-secondary)' : 'var(--text-muted)', opacity: f.ok ? 1 : 0.5 }}>{f.name}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link href="/contactUs"
+                      className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-[14px] font-semibold transition-all"
+                      style={plan.popular
+                        ? { background: `linear-gradient(135deg, ${plan.color}, #4F46E5)`, color: 'white' }
+                        : { background: 'var(--bg-secondary)', color: 'var(--text-secondary)', border: '1px solid var(--border-default)' }}>
+                      {plan.name === 'Enterprise' ? 'Contact Sales' : 'Get Started'} <ArrowRight size={13} />
+                    </Link>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Why section */}
+      <section className="py-[80px] sm:py-[100px]" style={{ background: 'var(--bg-secondary)' }}>
+        <div className="max-w-[1280px] mx-auto px-5 sm:px-6">
+          <motion.div {...fadeUp()} className="text-center mb-12">
+            <h2 className="text-[clamp(22px,3.5vw,40px)] font-extrabold mb-4" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}>
+              Why Our Pricing Model
+            </h2>
+          </motion.div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[
+              { icon: Lock, color: '#6366F1', title: 'Fixed Pricing', desc: 'No surprise costs. You know exactly what you\'re paying upfront.' },
+              { icon: Clock, color: '#10B981', title: 'Clear Timelines', desc: 'Realistic timelines with regular progress updates throughout.' },
+              { icon: Shield, color: '#A78BFA', title: 'Quality Guarantee', desc: 'Comprehensive testing and support — we stand behind our work.' },
+              { icon: Headphones, color: '#F59E0B', title: 'Dedicated Support', desc: 'Ongoing support and maintenance after delivery.' },
+            ].map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <motion.div key={item.title} {...fadeUp(i * 0.07)}
+                  className="p-6 rounded-[20px]" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ background: item.color + '18' }}>
+                    <Icon size={18} style={{ color: item.color }} />
+                  </div>
+                  <h3 className="text-[15px] font-bold mb-2" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}>{item.title}</h3>
+                  <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-inter)' }}>{item.desc}</p>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-[80px] sm:py-[100px]">
+        <div className="max-w-[760px] mx-auto px-5 sm:px-6">
+          <motion.div {...fadeUp()} className="text-center mb-12">
+            <h2 className="text-[clamp(22px,3.5vw,40px)] font-extrabold mb-4" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}>
+              Frequently Asked Questions
+            </h2>
+          </motion.div>
+          <div className="space-y-3">
+            {faqs.map((faq, i) => (
+              <motion.div key={i} {...fadeUp(i * 0.06)}>
+                <FAQ item={faq} />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="relative py-[80px] sm:py-[100px] overflow-hidden">
+        <div className="absolute inset-0">
+          <Image src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1600&q=80&fit=crop" alt="" fill className="object-cover" />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(3,3,8,0.92), rgba(7,7,15,0.88))' }} />
+        </div>
+        <div className="relative z-10 max-w-[700px] mx-auto px-5 sm:px-6 text-center">
+          <motion.div {...fadeUp()}>
+            <h2 className="text-[clamp(24px,4vw,42px)] font-extrabold mb-5 text-white" style={{ fontFamily: 'var(--font-jakarta)' }}>
+              Ready to Get a Quote?
+            </h2>
+            <p className="text-[16px] mb-8 text-white/65" style={{ fontFamily: 'var(--font-inter)' }}>
+              Tell us about your project and we'll provide a detailed, no-obligation proposal.
+            </p>
+            <Link href="/contactUs" className="btn-primary inline-flex items-center gap-2 justify-center">
+              Get Free Quote <ArrowRight size={15} />
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+    </div>
+  );
+}
