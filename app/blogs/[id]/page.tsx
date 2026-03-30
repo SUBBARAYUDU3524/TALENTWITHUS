@@ -1,736 +1,300 @@
-"use client";
-import { useSearchParams, useRouter } from "next/navigation";
-import Link from "next/link";
-import React, { useState, useEffect } from "react";
-import { auth, db } from "../../../FirebaseConfig";
-import {
-  collection,
-  getDoc,
-  getDocs,
-  doc,
-  query,
-  orderBy,
-  addDoc,
-  serverTimestamp,
-  limit,
-} from "firebase/firestore";
-import { SlArrowRight } from "react-icons/sl";
-import Image from "next/image";
-import LoginModal from "../../components/LoginModal";
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import BlogDetailClient from './BlogDetailClient';
 
-// --- Utility: Format Firestore Timestamp or string to readable date
-function formatDate(dateInput: any) {
-  if (!dateInput) return "";
-  if (typeof dateInput === "string") return dateInput;
-  if (typeof dateInput === "object" && typeof dateInput.seconds === "number") {
-    const date = new Date(dateInput.seconds * 1000);
-    return date.toLocaleString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZoneName: "short",
-    });
-  }
-  if (dateInput instanceof Date) {
-    return dateInput.toLocaleString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZoneName: "short",
-    });
-  }
-  return String(dateInput);
-}
-
-// --- Ads Component (Dummy placeholder, replace with actual ad script for prod)
-function AdComponent({
-  dataAdFormat,
-  dataFullWidthResponsive,
-  className = "",
-}: {
-  dataAdFormat?: string;
-  dataFullWidthResponsive?: boolean;
-  className?: string;
-}) {
-  return (
-    <div
-      className={`relative w-full h-32 bg-gradient-to-r from-cyan-800 to-cyan-500 rounded-xl flex items-center justify-center shadow border border-gray-200 ${className}`}
-      style={{
-        minHeight: "8rem",
-        overflow: "hidden",
-      }}
-    >
-      <span className="text-white font-bold text-lg">Sponsored Ad</span>
-    </div>
-  );
-}
-
-// --- Comment Type
-type Comment = {
+interface BlogPost {
   id: string;
-  name: string;
-  avatar: string;
-  date: string;
-  comment: string;
-};
-
-type User = {
-  name: string;
-  avatar: string;
-};
-
-type Promotion = {
-  id: string;
-  title?: string;
-  image: string;
-  url?: string;
-  description?: string;
-};
-
-// --- Render a single content block
-function renderBlock(block: any, idx: number) {
-  switch (block.type) {
-    case "Heading":
-      return (
-        <h2
-          key={idx}
-          className="text-xl sm:text-2xl font-bold my-6 text-black lg:text-3xl"
-        >
-          {block.text}
-        </h2>
-      );
-    case "Subheading":
-      return (
-        <h3
-          key={idx}
-          className="text-xl sm:text-xl font-semibold my-4 text-black"
-        >
-          {block.text}
-        </h3>
-      );
-    case "Paragraph":
-      return (
-        <p
-          key={idx}
-          className="text-base sm:text-lg text-gray-800 my-3 leading-relaxed"
-        >
-          {block.text}
-        </p>
-      );
-    case "List":
-      return (
-        <ul
-          key={idx}
-          className="list-disc pl-6 my-3 text-base text-gray-900"
-        >
-          {block.items?.filter(Boolean).map((item: string, i: number) => (
-            <li key={i} className="mb-2">
-              {item}
-            </li>
-          ))}
-        </ul>
-      );
-    case "Table":
-      return (
-        <table
-          key={idx}
-          className="border-collapse w-full my-6 bg-white"
-        >
-          <thead>
-            <tr>
-              {(block.headers || []).map((header: string, h: number) => (
-                <th
-                  key={h}
-                  className="p-2 border border-blue-300 bg-blue-200 text-black font-semibold"
-                >
-                  {header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {(block.rows || []).map((row: any, r: number) => (
-              <tr key={r}>
-                {(block.headers || []).map((header: string, c: number) => (
-                  <td
-                    key={c}
-                    className="p-2 border border-blue-200 text-black"
-                  >
-                    {row[header]}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      );
-    case "Image":
-      return block.url ? (
-        <Image
-          key={idx}
-          src={block.url}
-          alt={block.alt || "Image"}
-          width={800} // provide approximate or known width
-          height={600} // provide approximate or known height
-          className="max-w-full rounded-xl shadow-lg my-6 object-cover"
-        />
-      ) : null;
-    case "Link":
-      return (
-        <a
-          key={idx}
-          href={block.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 underline font-medium text-base inline-block my-2"
-        >
-          {block.text}
-        </a>
-      );
-    default:
-      return null;
-  }
+  title: string;
+  summary: string;
+  category?: string;
+  categoryName?: string;
+  categorySlug?: string;
+  contentBlocks?: any[];
+  mainImageUrl?: string;
+  readTime?: number;
+  views?: number;
+  likes?: number;
+  publishedAt?: any;
+  updatedAt?: any;
+  author?: { name: string; avatar?: string; bio?: string };
+  metaTitle?: string;
+  metaDescription?: string;
+  tags?: string[];
+  featured?: boolean;
+  trending?: boolean;
+  isPublished?: boolean;
 }
 
-export default function BlogPostPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
-  const params = React.use(paramsPromise);
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const blogParam = searchParams.get("blog");
-   const [user, setUser] = useState(null);
- 
+const STATIC_BLOGS = [
+  {
+    id: '1',
+    title: 'The Future of AI in Software Development',
+    summary: 'Exploring how artificial intelligence is transforming the way we write, test, and deploy code in modern development workflows.',
+    category: 'AI & ML',
+    categoryName: 'AI & ML',
+    isPublished: true,
+    featured: true,
+    trending: true,
+    publishedAt: new Date('2024-03-15'),
+    mainImageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=400&fit=crop',
+    readTime: 8,
+    views: 2456,
+    author: { name: 'Sarah Chen', avatar: '/avatars/sarah.jpg', bio: 'AI researcher and software engineer with 10+ years of experience in machine learning and cloud architecture.' },
+    tags: ['AI', 'Machine Learning', 'Development Tools'],
+    contentBlocks: [
+      { type: 'Heading', text: 'Introduction to AI in Development' },
+      { type: 'Paragraph', text: 'Artificial Intelligence is no longer just a buzzword in the tech industry. It has become an integral part of modern software development, revolutionizing everything from code generation to automated testing.' },
+      { type: 'Subheading', text: 'Key Applications' },
+      { type: 'List', items: ['Code completion and generation', 'Automated testing', 'Bug detection and fixing', 'Performance optimization'] },
+      { type: 'Paragraph', text: 'Tools like GitHub Copilot, ChatGPT, and various AI-powered IDE extensions are becoming essential companions for developers worldwide.' },
+      { type: 'Subheading', text: 'The Impact on Developer Productivity' },
+      { type: 'Paragraph', text: 'Studies show that AI-assisted development can increase productivity by up to 40%, allowing developers to focus on higher-level architectural decisions rather than repetitive coding tasks.' },
+      { type: 'Quote', text: 'AI is not replacing developers; it\'s augmenting their capabilities and allowing them to solve more complex problems.', author: 'Industry Expert' }
+    ]
+  },
+  {
+    id: '2',
+    title: 'Building Scalable Microservices with Node.js',
+    summary: 'A comprehensive guide to designing and implementing microservices architecture using Node.js and modern cloud technologies.',
+    category: 'Web Dev',
+    categoryName: 'Web Dev',
+    isPublished: true,
+    trending: false,
+    featured: false,
+    publishedAt: new Date('2024-03-10'),
+    mainImageUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=400&fit=crop',
+    readTime: 12,
+    views: 1823,
+    author: { name: 'Michael Rodriguez', avatar: '/avatars/michael.jpg', bio: 'Backend architect specializing in distributed systems and cloud-native applications.' },
+    tags: ['Node.js', 'Microservices', 'Architecture'],
+    contentBlocks: [
+      { type: 'Heading', text: 'Understanding Microservices' },
+      { type: 'Paragraph', text: 'Microservices architecture has emerged as a dominant pattern for building scalable and maintainable applications. This approach breaks down complex systems into smaller, independent services.' },
+      { type: 'Subheading', text: 'Core Principles' },
+      { type: 'List', items: ['Single responsibility per service', 'Independent deployment', 'Data isolation', 'Fault tolerance'] },
+      { type: 'Code', code: '// Example Node.js microservice\nconst express = require("express");\nconst app = express();\n\napp.get("/api/users", async (req, res) => {\n  const users = await userService.getAll();\n  res.json(users);\n});\n\napp.listen(3000);' },
+      { type: 'Paragraph', text: 'Node.js is particularly well-suited for microservices due to its event-driven architecture and lightweight runtime.' }
+    ]
+  },
+  {
+    id: '3',
+    title: 'Cloud-Native Development Strategies',
+    summary: 'Best practices for building applications that leverage the full power of cloud computing platforms and services.',
+    category: 'Cloud',
+    categoryName: 'Cloud',
+    isPublished: true,
+    trending: true,
+    featured: false,
+    publishedAt: new Date('2024-03-08'),
+    mainImageUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=400&fit=crop',
+    readTime: 10,
+    views: 1567,
+    author: { name: 'Emily Watson', avatar: '/avatars/emily.jpg', bio: 'Cloud solutions architect helping companies migrate to modern infrastructure.' },
+    tags: ['Cloud Computing', 'DevOps', 'AWS'],
+    contentBlocks: [
+      { type: 'Heading', text: 'Cloud-Native Principles' },
+      { type: 'Paragraph', text: 'Cloud-native development is about building and running applications to take advantage of the distributed computing offered by the cloud delivery model.' },
+      { type: 'Subheading', text: 'Key Concepts' },
+      { type: 'List', items: ['Containerization with Docker', 'Orchestration with Kubernetes', 'CI/CD pipelines', 'Infrastructure as Code'] },
+      { type: 'Paragraph', text: 'These practices enable teams to build scalable, resilient applications that can adapt to changing demands.' }
+    ]
+  },
+  {
+    id: '4',
+    title: 'Modern React Patterns and Best Practices',
+    summary: 'Explore the latest React patterns, hooks, and architectural approaches for building maintainable applications.',
+    category: 'Web Dev',
+    categoryName: 'Web Dev',
+    isPublished: true,
+    trending: false,
+    featured: false,
+    publishedAt: new Date('2024-03-05'),
+    mainImageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&h=400&fit=crop',
+    readTime: 15,
+    views: 2891,
+    author: { name: 'David Kim', avatar: '/avatars/david.jpg', bio: 'Frontend engineer passionate about React ecosystem and modern web technologies.' },
+    tags: ['React', 'JavaScript', 'Frontend'],
+    contentBlocks: [
+      { type: 'Heading', text: 'React Evolution' },
+      { type: 'Paragraph', text: 'React has evolved significantly over the years, introducing new patterns and best practices that help developers build more efficient and maintainable applications.' },
+      { type: 'Subheading', text: 'Modern Hooks' },
+      { type: 'Code', code: '// Custom hook example\nfunction useApi(url) {\n  const [data, setData] = useState(null);\n  const [loading, setLoading] = useState(true);\n\n  useEffect(() => {\n    fetch(url).then(res => res.json()).then(setData).finally(() => setLoading(false));\n  }, [url]);\n\n  return { data, loading };\n}' },
+      { type: 'Paragraph', text: 'Custom hooks allow you to extract component logic into reusable functions.' }
+    ]
+  },
+  {
+    id: '5',
+    title: 'Mobile-First Design in 2024',
+    summary: 'Why mobile-first design is crucial and how to implement it effectively in modern web development projects.',
+    category: 'Design',
+    categoryName: 'Design',
+    isPublished: true,
+    trending: false,
+    featured: false,
+    publishedAt: new Date('2024-03-01'),
+    mainImageUrl: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&h=400&fit=crop',
+    readTime: 7,
+    views: 1234,
+    author: { name: 'Lisa Anderson', avatar: '/avatars/lisa.jpg', bio: 'UX designer focused on creating intuitive mobile experiences.' },
+    tags: ['Design', 'Mobile', 'UX'],
+    contentBlocks: [
+      { type: 'Heading', text: 'Mobile-First Philosophy' },
+      { type: 'Paragraph', text: 'With over 60% of web traffic coming from mobile devices, adopting a mobile-first approach is no longer optional—it\'s essential.' },
+      { type: 'Subheading', text: 'Implementation Strategies' },
+      { type: 'List', items: ['Start with mobile layouts', 'Progressively enhance for desktop', 'Optimize touch interactions', 'Minimize loading times'] },
+      { type: 'Paragraph', text: 'This approach ensures better performance and user experience across all devices.' }
+    ]
+  },
+  {
+    id: '6',
+    title: 'Cybersecurity Best Practices for Developers',
+    summary: 'Essential security measures every developer should implement to protect applications and user data.',
+    category: 'Technology',
+    categoryName: 'Technology',
+    isPublished: true,
+    trending: true,
+    featured: false,
+    publishedAt: new Date('2024-02-28'),
+    mainImageUrl: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=400&fit=crop',
+    readTime: 11,
+    views: 3456,
+    author: { name: 'James Wilson', avatar: '/avatars/james.jpg', bio: 'Security specialist helping organizations build secure applications.' },
+    tags: ['Security', 'Best Practices', 'Development'],
+    contentBlocks: [
+      { type: 'Heading', text: 'Security First Approach' },
+      { type: 'Paragraph', text: 'In today\'s digital landscape, security cannot be an afterthought. Developers must integrate security practices throughout the entire development lifecycle.' },
+      { type: 'Subheading', text: 'Essential Practices' },
+      { type: 'List', items: ['Input validation and sanitization', 'Authentication and authorization', 'Data encryption', 'Regular security audits'] },
+      { type: 'Code', code: '// Example of secure password handling\nconst bcrypt = require("bcrypt");\n\nasync function hashPassword(password) {\n  const saltRounds = 12;\n  return await bcrypt.hash(password, saltRounds);\n}' },
+      { type: 'Paragraph', text: 'Implementing these practices from the beginning helps prevent common vulnerabilities.' }
+    ]
+  },
+  {
+    id: '7',
+    title: 'The Rise of Edge Computing',
+    summary: 'Understanding how edge computing is transforming data processing and reducing latency in modern applications.',
+    category: 'Technology',
+    categoryName: 'Technology',
+    isPublished: true,
+    trending: false,
+    featured: false,
+    publishedAt: new Date('2024-02-25'),
+    mainImageUrl: 'https://images.unsplash.com/photo-1558494949-ef010cbcc31c?w=800&h=400&fit=crop',
+    readTime: 9,
+    views: 987,
+    author: { name: 'Alex Thompson', avatar: '/avatars/alex.jpg', bio: 'Infrastructure engineer exploring edge computing and distributed systems.' },
+    tags: ['Edge Computing', 'Infrastructure', 'Performance'],
+    contentBlocks: [
+      { type: 'Heading', text: 'What is Edge Computing?' },
+      { type: 'Paragraph', text: 'Edge computing brings computation and data storage closer to the location where it is needed, improving response times and saving bandwidth.' },
+      { type: 'Subheading', text: 'Benefits' },
+      { type: 'List', items: ['Reduced latency', 'Bandwidth optimization', 'Improved privacy', 'Better offline functionality'] },
+      { type: 'Paragraph', text: 'This paradigm shift is particularly important for IoT devices and real-time applications.' }
+    ]
+  },
+  {
+    id: '8',
+    title: 'Business Intelligence with Modern Data Stack',
+    summary: 'How to build effective BI solutions using modern data tools and cloud platforms for better decision-making.',
+    category: 'Business',
+    categoryName: 'Business',
+    isPublished: true,
+    trending: false,
+    featured: false,
+    publishedAt: new Date('2024-02-20'),
+    mainImageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=400&fit=crop',
+    readTime: 13,
+    views: 1456,
+    author: { name: 'Rachel Green', avatar: '/avatars/rachel.jpg', bio: 'Data analyst helping companies leverage data for strategic decisions.' },
+    tags: ['Business Intelligence', 'Data Analytics', 'Strategy'],
+    contentBlocks: [
+      { type: 'Heading', text: 'Modern Data Stack' },
+      { type: 'Paragraph', text: 'The modern data stack has revolutionized how organizations approach business intelligence, enabling faster insights and more agile decision-making.' },
+      { type: 'Subheading', text: 'Components' },
+      { type: 'List', items: ['Data extraction tools', 'Cloud data warehouses', 'Transformation frameworks', 'Visualization platforms'] },
+      { type: 'Paragraph', text: 'These tools work together to create efficient, scalable data pipelines.' }
+    ]
+  },
+  {
+    id: '9',
+    title: 'Progressive Web Apps: The Future of Web',
+    summary: 'Why PWAs are becoming the standard for web applications and how to implement them effectively.',
+    category: 'Mobile',
+    categoryName: 'Mobile',
+    isPublished: true,
+    trending: true,
+    featured: false,
+    publishedAt: new Date('2024-02-15'),
+    mainImageUrl: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?w=800&h=400&fit=crop',
+    readTime: 8,
+    views: 2234,
+    author: { name: 'Tom Harris', avatar: '/avatars/tom.jpg', bio: 'Full-stack developer specializing in PWA and mobile web technologies.' },
+    tags: ['PWA', 'Web Development', 'Mobile'],
+    contentBlocks: [
+      { type: 'Heading', text: 'PWA Revolution' },
+      { type: 'Paragraph', text: 'Progressive Web Apps combine the best of web and mobile applications, offering offline capabilities, push notifications, and app-like experiences.' },
+      { type: 'Subheading', text: 'Key Features' },
+      { type: 'List', items: ['Service workers for offline support', 'App shell architecture', 'Push notifications', 'Installable on home screen'] },
+      { type: 'Code', code: '// Service worker example\nself.addEventListener("install", event => {\n  event.waitUntil(\n    caches.open("v1").then(cache => {\n      return cache.addAll(["/app/", "/app/index.html"]);\n    })\n  );\n});' },
+      { type: 'Paragraph', text: 'PWAs are transforming how users interact with web applications on mobile devices.' }
+    ]
+  }
+];
 
-  const [post, setPost] = useState<any>(null);
-  const [recentPosts, setRecentPosts] = useState<any[]>([]);
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [newComment, setNewComment] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [commentsLoading, setCommentsLoading] = useState(true);
-  const [recentLoading, setRecentLoading] = useState(true);
-
-  const [promotions, setPromotions] = useState<Promotion[]>([]);
-  const [promoLoading, setPromoLoading] = useState(true);
-
-  const [trendingPosts, setTrendingPosts] = useState<any[]>([]);
-  const [trendingLoading, setTrendingLoading] = useState(true);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
-  
-  // --- Fetch blog post data from Firestore ---
-  useEffect(() => {
-    let unsub: (() => void) | null = null;
-    async function fetchPost() {
-      setLoading(true);
-      try {
-        const docRef = doc(db, "blogs-testing", params.id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setPost({ ...docSnap.data(), id: params.id });
-        } else if (blogParam) {
-          let parsedPost = null;
-          try {
-            parsedPost = blogParam && JSON.parse(decodeURIComponent(blogParam));
-          } catch {
-            parsedPost = null;
-          }
-          setPost(parsedPost);
-        } else {
-          setPost(null);
-        }
-      } catch (e) {
-        setPost(null);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchPost();
-    return () => {
-      unsub?.();
-    };
-  }, [params.id, blogParam]);
-
-  // --- Fetch recent posts (exclude current) ---
-  useEffect(() => {
-    setRecentLoading(true);
-    async function fetchRecent() {
-      try {
-        const q = query(
-          collection(db, "blogs-testing"),
-          orderBy("date", "desc"),
-          limit(6)
-        );
-        const snap = await getDocs(q);
-        const data = snap.docs
-          .map((doc) => ({ ...doc.data(), id: doc.id }))
-          .filter((p) => p.id !== params.id)
-          .slice(0, 5);
-        setRecentPosts(data);
-      } catch {
-        setRecentPosts([]);
-      } finally {
-        setRecentLoading(false);
-      }
-    }
-    fetchRecent();
-  }, [params.id]);
-
-  // --- Fetch promotions ---
-  useEffect(() => {
-    setPromoLoading(true);
-    async function fetchPromotions() {
-      try {
-        const promoSnapshot = await getDocs(
-          query(collection(db, "promotions"), orderBy("createdAt", "desc"))
-        );
-        let promoData: Promotion[] = [];
-        promoSnapshot.forEach((doc) =>
-          promoData.push({ ...doc.data(), id: doc.id } as Promotion)
-        );
-        setPromotions(promoData);
-      } catch (e) {
-        setPromotions([]);
-      } finally {
-        setPromoLoading(false);
-      }
-    }
-    fetchPromotions();
-  }, []);
-
-  // --- Fetch trending posts (where trending: true) ---
-  useEffect(() => {
-    setTrendingLoading(true);
-    async function fetchTrending() {
-      try {
-        const blogsSnapshot = await getDocs(
-          query(collection(db, "blogs-testing"), orderBy("date", "desc"))
-        );
-        const trendingData = blogsSnapshot.docs
-          .map((doc) => ({ ...(doc.data() as any), id: doc.id }))
-          .filter((p: any) => p.trending === true);
-        setTrendingPosts(trendingData);
-      } catch {
-        setTrendingPosts([]);
-      } finally {
-        setTrendingLoading(false);
-      }
-    }
-    fetchTrending();
-  }, []);
-
-  // --- Fetch comments for this post from Firestore ---
-  useEffect(() => {
-    if (!post?.id) {
-      setComments([]);
-      setCommentsLoading(false);
-      return;
-    }
-    setCommentsLoading(true);
-    async function fetchComments() {
-      try {
-        const q = query(
-          collection(db, "blogs-testing", post.id, "comments"),
-          orderBy("createdAt", "desc")
-        );
-        const snap = await getDocs(q);
-        const data: Comment[] = snap.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        })) as Comment[];
-        setComments(data);
-      } catch {
-        setComments([]);
-      } finally {
-        setCommentsLoading(false);
-      }
-    }
-    fetchComments();
-  }, [post?.id]);
-
-function timeAgo(timestamp: any) {
-  if (!timestamp) return '';
-
-  let date: Date;
-  if (timestamp.seconds) {
-    date = new Date(timestamp.seconds * 1000);
-  } else if (timestamp.toDate) {
-    date = timestamp.toDate();
-  } else if (timestamp instanceof Date) {
-    date = timestamp;
-  } else return '';
-
-  const now = new Date();
-  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (seconds < 60) return 'just now';  // less than 1 min
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes} min${minutes !== 1 ? 's' : ''} ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} hr${hours !== 1 ? 's' : ''} ago`;
-  const days = Math.floor(hours / 24);
-  return `${days} day${days !== 1 ? 's' : ''} ago`;
+async function getPost(id: string) {
+  const post = STATIC_BLOGS.find(p => p.id === id);
+  return post || null;
 }
 
+async function getRelated(currentId: string, category: string) {
+  return STATIC_BLOGS
+    .filter(p => p.id !== currentId && (p.categoryName || p.category) === category)
+    .slice(0, 3);
+}
 
+export async function generateStaticParams() {
+  return STATIC_BLOGS.map(post => ({ id: post.id }));
+}
 
-  // --- Comment submission handler (require login) ---
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!user) {
-    setIsLoginModalOpen(true); // Changed from setShowLoginModal to setIsLoginModalOpen
-    return;
-  }
-  if (!newComment.trim() || !post?.id) return;
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const post = await getPost(id);
+  if (!post) return { title: 'Post Not Found — TalentWithUs' };
+  return {
+    title: `${post.title} — TalentWithUs`,
+    description: post.summary,
+    openGraph: {
+      title: post.title,
+      description: post.summary,
+      type: 'article',
+      images: post.mainImageUrl ? [post.mainImageUrl] : [],
+    },
+  };
+}
 
-  const userName = user.name || 'Anonymous';
-  const userAvatar = user.avatar || 'https://randomuser.me/api/portraits/men/1.jpg';
+export default async function BlogDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const post = await getPost(id);
+  if (!post) notFound();
 
-  const newCommentObj = {
-    name: userName,
-    avatar: userAvatar,
-    date: serverTimestamp(),
-    comment: newComment,
-    createdAt: serverTimestamp(),
+  const related = await getRelated(post.id, post.categoryName || post.category || '');
+
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    description: post.summary,
+    image: post.mainImageUrl,
+    datePublished: post.publishedAt?.toISOString(),
+    dateModified: post.publishedAt?.toISOString(),
+    author: { '@type': 'Person', name: post.author?.name || 'TalentWithUs' },
+    publisher: { '@type': 'Organization', name: 'TalentWithUs' },
   };
 
-  // Add to firestore
-  try {
-    const ref = await addDoc(
-      collection(db, "blogs-testing", post.id, "comments"),
-      newCommentObj
-    );
-    setComments([{ ...newCommentObj, id: ref.id, date: "Just now" }, ...comments]);
-    setNewComment("");
-  } catch (error) {
-    console.error("Failed to add comment: ", error);
-  }
-};
-
-
-
-  if (loading) {
-    return (
-      <div className="bg-white min-h-screen text-black py-20 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl font-bold mb-4">Loading post...</h1>
-        </div>
-      </div>
-    );
-  }
-
-  if (!post) {
-    return (
-      <div className="bg-white min-h-screen text-black py-20 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl font-bold mb-4">Post Not Found</h1>
-          <Link href="/blogs" className="text-blue-600 hover:text-blue-700">
-            ← Back to all posts
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    
-    <div className="bg-white min-h-screen text-black py-10 px-4 sm:px-6">
-      <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8">
-          {isLoginModalOpen && (
-    <LoginModal
-      isOpen={isLoginModalOpen}
-      onClose={() => setIsLoginModalOpen(false)}
-    />
-  )}
-        {/* Left Main Content */}
-        <div className="w-full lg:w-2/3">
-          {/* Back button */}
-          <div className="mb-7">
-            <Link
-              href="/blogs"
-              className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors group"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              Back to all posts
-            </Link>
-          </div>
-
-          {/* Title */}
-          <h1 className="text-xl sm:text-2xl font-extrabold mb-2 lg:text-4xl text-black">{post.title}</h1>
-          {/* Summary */}
-          {post.summary && (
-            <p
-              className="text-lg text-gray-700 mb-4 font-medium break-words"
-              style={{ wordWrap: "break-word", overflowWrap: "break-word", maxWidth: "100%" }}
-            >
-              {post.summary}
-            </p>
-          )}
-          {/* Blog Image */}
-          {post.image && (
-            <Image
-              src={post.image}
-              alt={post.title}
-              width={800}
-              height={400}
-              className="w-full h-auto object-cover rounded-xl shadow mb-8"
-              style={{ display: "block" }}
-              loading="eager"
-            />
-          )}
-
-          {/* Render blog content blocks */}
-          <div className="mb-12">
-            {(post.content || []).map(renderBlock)}
-          </div>
-
-          {/* Comments and Ads section */}
-          <div className="mb-16">
-            <h2 className="text-2xl font-bold mb-8 pb-2 border-b border-gray-200">
-              Comments ({comments.length})
-            </h2>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-              {/* Left: comments form and list */}
-              <div className="lg:col-span-2">
-                {/* Comment Form */}
-                <form
-                  onSubmit={handleSubmit}
-                  className="bg-blue-50 rounded-xl p-6 mb-8 w-full max-w-xl border border-blue-100"
-                >
-                  <h3 className="text-lg font-medium mb-4 text-blue-700">Leave a comment</h3>
-                  {!user && (
-  <div className="mb-4">
-    <button
-      type="button"
-      className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-semibold"
-      onClick={() => setIsLoginModalOpen(true)} // Changed from setShowLoginModal to setIsLoginModalOpen
-    >
-      Login to comment
-    </button>
-  </div>
-)}
-                  <textarea
-                    id="comment"
-                    rows={2}
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Write your comment here..."
-                    className="w-full px-4 py-2 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent text-black mb-4"
-                    required
-                    disabled={!user}
-                  ></textarea>
-                  <button
-                    type="submit"
-                    className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-                    disabled={!user || !newComment.trim()}
-                  >
-                    Post Comment
-                  </button>
-                </form>
-                {/* Comments List */}
-                <div className="space-y-6 w-full max-w-xl">
-                  {commentsLoading ? (
-                    <div className="text-gray-400 text-center">Loading comments...</div>
-                  ) : comments.length === 0 ? (
-                    <div className="text-gray-400 text-center">No comments yet.</div>
-                  ) : (
-                    comments.map((comment) => (
-                      <div key={comment.id} className="flex gap-4 transition">
-                        <Image
-                          src={comment.avatar}
-                          alt={comment.name || "User Avatar"}
-                          width={48} // corresponds to w-12
-                          height={48} // corresponds to h-12
-                          className="rounded-full object-cover border-2 border-blue-400 transition"
-                        />
-                        <div className="flex-1 bg-blue-50 rounded-2xl p-5 shadow-md border border-blue-100">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-semibold text-black transition">
-                              {comment.name}
-                            </h4>
-                            <span className="text-xs text-gray-500 italic">{timeAgo(comment.date)}</span>
-
-                          </div>
-                          <p className="text-gray-700 leading-relaxed">
-                            {comment.comment}
-                          </p>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-              {/* Right: Ads Section */}
-              <div className="flex flex-col gap-8">
-                <AdComponent
-                  dataAdFormat="auto"
-                  dataFullWidthResponsive={true}
-                  className="mb-6"
-                />
-                <AdComponent
-                  dataAdFormat="auto"
-                  dataFullWidthResponsive={true}
-                  className="mb-6 h-60"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        {/* Right Sidebar: Promotions, Recent Posts, Trending Posts */}
-        <div className="w-full lg:w-1/3 flex flex-col gap-10 ">
-          {/* Promotions section */}
-          <div className="bg-white shadow-lg mb-6 border border-blue-100 rounded-xl overflow-hidden">
-            <div className="px-4 py-3 bg-blue-50">
-              {promoLoading ? (
-                <div className="text-black">Loading promotions...</div>
-              ) : promotions.length === 0 ? (
-                <div className="text-black">No promotions found.</div>
-              ) : (
-                promotions.map((promo) => (
-                  <a
-                    key={promo.id}
-                    href={promo.url || "#"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex flex-col gap-2 py-2 group "
-                  >
-                    <Image
-                      src={promo.image}
-                      alt={promo.title || "Promotion"}
-                      width={340}
-                      height={180}
-                      className="w-full h-44 object-cover rounded-lg border border-blue-200"
-                      style={{ maxHeight: "180px", minHeight: "120px", background: "#e2e8f0" }}
-                      loading="lazy"
-                    />
-                    <span className="font-semibold text-blue-700 text-base">
-                      {promo.title}
-                    </span>
-                    {promo.description && (
-                      <span className="text-sm text-gray-600">{promo.description}</span>
-                    )}
-                  </a>
-                ))
-              )}
-            </div>
-          </div>
-          {/* Recent Posts section */}
-          <div className="bg-blue-600 shadow-lg mb-8 border border-blue-200">
-            <h2 className="text-white text-lg font-bold px-6 py-3 border-b border-blue-400">
-              Recent Posts
-            </h2>
-            <div className="px-4 py-3 bg-blue-50 text-black">
-              {recentLoading ? (
-                <div className="text-black">Loading...</div>
-              ) : recentPosts.length === 0 ? (
-                <div className="text-black">No recent posts found.</div>
-              ) : (
-                recentPosts.map((rp) => (
-                  <Link
-                    key={rp.id}
-                    href={{
-                      pathname: `/blogs/${rp.id}`,
-                      query: { blog: encodeURIComponent(JSON.stringify(rp)) },
-                    }}
-                    className="flex items-center gap-2 py-2 group text-gray-900 hover:text-gray-950"
-                  >
-                    <SlArrowRight className="text-black text-base shrink-0" />
-                    <span
-                      className="truncate-2-lines group-hover:underline flex-1"
-                      style={{
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        maxHeight: "3.2em",
-                        lineHeight: "1.6em",
-                        wordBreak: "break-word",
-                      }}
-                    >
-                      {rp.title}
-                    </span>
-                  </Link>
-                ))
-              )}
-            </div>
-          </div>
-          {/* Trending Posts section */}
-          <div className="bg-blue-600 shadow-lg mb-8 border border-blue-200">
-            <h2 className="text-white text-lg font-bold px-6 py-3 border-b border-blue-400">
-              Trending Posts
-            </h2>
-            <div className="px-4 py-3 bg-blue-50 text-black">
-              {trendingLoading ? (
-                <div className="text-black">Loading...</div>
-              ) : trendingPosts.length === 0 ? (
-                <div className="text-black">No Trending posts found.</div>
-              ) : (
-                trendingPosts.map((tp) => (
-                  <Link
-                    key={tp.id}
-                    href={{
-                      pathname: `/blogs/${tp.id}`,
-                      query: { blog: encodeURIComponent(JSON.stringify(tp)) },
-                    }}
-                    className="flex items-center gap-2 py-2 group text-gray-900 hover:text-gray-950"
-                  >
-                    <SlArrowRight className="text-black text-base shrink-0" />
-                    <span
-                      className="truncate-2-lines group-hover:underline flex-1"
-                      style={{
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        maxHeight: "3.2em",
-                        lineHeight: "1.6em",
-                        wordBreak: "break-word",
-                      }}
-                    >
-                      {tp.title}
-                    </span>
-                  </Link>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* Two line clamp utility for recent post titles */}
-      <style>{`
-        .truncate-2-lines {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          max-height: 3.2em;
-          line-height: 1.6em;
-          word-break: break-word;
-        }
-      `}</style>
-    </div>
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+      <BlogDetailClient post={post} relatedPosts={related} />
+    </>
   );
 }

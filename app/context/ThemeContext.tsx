@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 type Theme = "light" | "dark";
 type ThemeContextProps = {
   theme: Theme;
-  setTheme: (theme: Theme) => void;
+  setTheme: (t: Theme) => void;
   toggleTheme: () => void;
 };
 
@@ -16,25 +16,31 @@ export function useThemeContext() {
   return ctx;
 }
 
-export const ThemeProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  const [theme, setThemeState] = useState<Theme>("light");
+function applyTheme(t: Theme) {
+  if (t === "dark") {
+    document.documentElement.classList.add("dark");
+    document.documentElement.classList.remove("light");
+  } else {
+    document.documentElement.classList.remove("dark");
+    document.documentElement.classList.add("light");
+  }
+}
+
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [theme, setThemeState] = useState<Theme>("dark");
 
   useEffect(() => {
-    const saved = typeof window !== "undefined" && localStorage.getItem("theme");
-    if (saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-      setThemeState("dark");
-      document.documentElement.classList.add("dark");
-    } else {
-      setThemeState("light");
-      document.documentElement.classList.remove("dark");
-    }
+    const saved = localStorage.getItem("twu-theme") as Theme | null;
+    // Always default to dark; only go light if user explicitly chose it
+    const resolved: Theme = saved === "light" ? "light" : "dark";
+    applyTheme(resolved);
+    setThemeState(resolved);
   }, []);
 
   const setTheme = (t: Theme) => {
     setThemeState(t);
-    localStorage.setItem("theme", t);
-    if (t === "dark") document.documentElement.classList.add("dark");
-    else document.documentElement.classList.remove("dark");
+    localStorage.setItem("twu-theme", t);
+    applyTheme(t);
   };
 
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");

@@ -2,24 +2,22 @@
 import { usePathname } from 'next/navigation';
 import Navbar from './Navbar';
 import { AuthProvider } from '../context/AuthContext';
-import Footer from "../components/Footer"
+import { ThemeProvider } from '../context/ThemeContext';
+import Footer from './Footer';
 
-export default function LayoutWrapper({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-
-  // Hide navbar for /blogs and all /blogs/* routes
-  const hideNavbar = pathname.startsWith('/blogs');
-  const mainClassName = `${!hideNavbar ? 'pt-16 md:pt-20' : ''} min-h-screen`;
+  // Always show navbar — blogs get it too for a consistent experience
+  const isAdmin = pathname.startsWith('/admin');
+  const mainClass = 'pt-[68px] min-h-screen';
 
   return (
-    <AuthProvider>
-      {!hideNavbar && <Navbar />}
-      <main className={mainClassName}>{children}</main>
-      <Footer />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        {!isAdmin && <Navbar />}
+        <main className={mainClass}>{children}</main>
+        {!isAdmin && <Footer />}
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

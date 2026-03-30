@@ -1,145 +1,98 @@
-"use client";
+'use client';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
+import { ArrowRight, Calendar, MessageSquare, Zap } from 'lucide-react';
+import Link from 'next/link';
+import ScheduleCallModal from './ScheduleCallModal';
 
-import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import ScheduleCallModal from "./ScheduleCallModal";
+const highlights = [
+  { icon: <Zap size={14} className="text-indigo-400" />, text: 'Free consultation' },
+  { icon: <Calendar size={14} className="text-cyan-400" />, text: 'Quick turnaround' },
+  { icon: <MessageSquare size={14} className="text-emerald-400" />, text: 'Dedicated support' },
+];
 
 export default function CompanyBanner() {
-  const [showModal, setShowModal] = useState(false);
-  const [time, setTime] = useState("");
-  const [stats, setStats] = useState({ projects: 0, clients: 0, satisfaction: 0 });
-
-  // ✅ Lightweight clock update (optimized)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTime(
-        new Date().toLocaleTimeString("en-US", {
-          hour12: true,
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        })
-      );
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // ✅ Smooth stats animation – no heavy loops
-  useEffect(() => {
-    const duration = 1000;
-    const start = performance.now();
-
-    const animate = (now: number) => {
-      const progress = Math.min((now - start) / duration, 1);
-
-      setStats({
-        projects: Math.round(progress * 50),
-        clients: Math.round(progress * 35),
-        satisfaction: Math.round(progress * 99.8),
-      });
-
-      if (progress < 1) requestAnimationFrame(animate);
-    };
-
-    requestAnimationFrame(animate);
-  }, []);
+  const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.15 });
+  const [modalOpen, setModalOpen] = React.useState(false);
 
   return (
-    <section className="relative my-16 bg-black text-white py-24 px-6 sm:px-12 lg:px-20 rounded-3xl border border-white/10 overflow-hidden">
-
-      {/* ✅ Soft background glow */}
-      <div className="absolute inset-0 bg-gradient-to-br from-cyan-600/10 via-transparent to-purple-600/10" />
-
-      {/* ✅ Lightweight patterned grid */}
-      <div
-        className="absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
-        }}
-      />
-
-      {/* ✅ CONTENT */}
-      <motion.div
-        initial={{ opacity: 0, y: 35 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: "easeOut" }}
-        className="relative z-10 max-w-6xl mx-auto text-center"
-      >
-
-        {/* ✅ LIVE CLOCK */}
-        <div className="flex justify-center items-center gap-4 mb-8">
-          <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            <span className="font-mono text-cyan-300 text-sm">{time}</span>
-          </div>
-
-          <span className="px-3 py-1 bg-green-600/20 text-green-300 border border-green-600/30 text-xs rounded-full font-semibold">
-            LIVE
-          </span>
+    <>
+      <section className="relative py-[90px] sm:py-[110px] overflow-hidden" style={{ background: 'var(--bg-secondary)' }}>
+        <div className="absolute top-0 inset-x-0 h-px gradient-line" />
+        <div className="absolute bottom-0 inset-x-0 h-px gradient-line" />
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-indigo-600/[0.055] rounded-full blur-[120px]" />
         </div>
+        <div className="absolute inset-0 dot-pattern opacity-[0.22] pointer-events-none" />
 
-        {/* ✅ TITLE */}
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-black leading-tight mb-6 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-          Building Exceptional Digital Products
-        </h1>
-
-        {/* ✅ SUBTEXT */}
-        <p className="text-gray-300 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
-          We design and develop powerful websites, next-gen applications, and intelligent digital systems that scale with your business.
-        </p>
-
-        {/* ✅ STATS (ultra-light animation) */}
-        <div className="grid grid-cols-3 gap-6 max-w-md mx-auto my-12">
-          {[
-            { label: "Projects", value: stats.projects, color: "text-cyan-400" },
-            { label: "Clients", value: stats.clients, color: "text-blue-400" },
-            { label: "Satisfaction", value: `${stats.satisfaction}%`, color: "text-green-400" },
-          ].map((item, i) => (
-            <motion.div
-              key={i}
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 250, damping: 20 }}
-              className="text-center p-4 bg-white/5 border border-white/10 rounded-xl backdrop-blur-sm"
-            >
-              <div className={`text-2xl font-bold ${item.color}`}>{item.value}</div>
-              <div className="text-sm text-gray-400">{item.label}</div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* ✅ CTA */}
-        <motion.button
-          onClick={() => setShowModal(true)}
-          whileHover={{ scale: 1.06 }}
-          whileTap={{ scale: 0.95 }}
-          className="relative bg-gradient-to-r from-cyan-500 to-blue-600 px-12 py-4 rounded-2xl text-lg font-bold shadow-xl"
-        >
-          Schedule a Call
-        </motion.button>
-      </motion.div>
-
-      {/* ✅ MODAL */}
-      <AnimatePresence>
-        {showModal && (
+        <div className="relative z-10 max-w-[1280px] mx-auto px-5 sm:px-6">
           <motion.div
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            ref={ref}
+            initial={{ opacity: 0, y: 40 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="relative rounded-[24px] sm:rounded-[28px] overflow-hidden p-8 sm:p-12 md:p-16 text-center"
+            style={{
+              background: 'linear-gradient(135deg, rgba(99,102,241,0.10) 0%, rgba(6,182,212,0.05) 50%, rgba(16,185,129,0.05) 100%)',
+              border: '1px solid rgba(99,102,241,0.18)',
+              boxShadow: '0 0 80px rgba(99,102,241,0.06), inset 0 0 40px rgba(99,102,241,0.03)',
+            }}
           >
-            <motion.div
-              initial={{ scale: 0.85, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.85, opacity: 0 }}
-              transition={{ duration: 0.25 }}
-            >
-              <ScheduleCallModal onClose={() => setShowModal(false)} />
-            </motion.div>
+            <div className="absolute top-0 left-0 w-24 h-24 border-t-2 border-l-2 border-indigo-500/25 rounded-tl-[28px]" />
+            <div className="absolute bottom-0 right-0 w-24 h-24 border-b-2 border-r-2 border-cyan-500/25 rounded-br-[28px]" />
+
+            <div className="badge badge-indigo mb-6 mx-auto inline-flex">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse inline-block" />
+              Ready to Start?
+            </div>
+
+            <h2 className="text-[clamp(28px,5vw,54px)] font-extrabold leading-tight mb-5" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}>
+              Let&apos;s Build Something{' '}
+              <span className="gradient-text">Remarkable Together</span>
+            </h2>
+
+            <p className="text-[16px] max-w-[520px] mx-auto leading-relaxed mb-9" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-inter)' }}>
+              Tell us about your project and we'll respond within 24 hours with a tailored proposal.
+            </p>
+
+            <div className="flex flex-wrap justify-center gap-3 mb-9">
+              {highlights.map(({ icon, text }) => (
+                <div key={text} className="flex items-center gap-2 px-4 py-2.5 rounded-xl" style={{ border: '1px solid var(--border-default)', background: 'var(--bg-card)' }}>
+                  {icon}
+                  <span className="text-[12.5px] font-medium" style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-inter)' }}>{text}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3.5 justify-center">
+              <Link href="/contactUs">
+                <motion.button
+                  whileHover={{ scale: 1.03, boxShadow: '0 20px 50px rgba(99,102,241,0.50)' }}
+                  whileTap={{ scale: 0.97 }}
+                  className="flex items-center justify-center gap-2.5 px-8 py-4 rounded-[12px] text-[15px] font-semibold text-white w-full sm:w-auto"
+                  style={{ background: 'linear-gradient(135deg,#6366F1,#4F46E5)', boxShadow: '0 8px 28px rgba(99,102,241,0.40)' }}
+                >
+                  Start a Project <ArrowRight size={15} />
+                </motion.button>
+              </Link>
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setModalOpen(true)}
+                className="flex items-center justify-center gap-2 px-8 py-4 rounded-[12px] text-[15px] font-medium transition-colors w-full sm:w-auto"
+                style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-default)', background: 'var(--bg-card)' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)'; }}
+              >
+                <Calendar size={15} /> Book a Call
+              </motion.button>
+            </div>
           </motion.div>
-        )}
-      </AnimatePresence>
-    </section>
+        </div>
+      </section>
+
+      {modalOpen && <ScheduleCallModal onClose={() => setModalOpen(false)} />}
+    </>
   );
 }

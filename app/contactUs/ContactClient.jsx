@@ -1,10 +1,9 @@
-
-
 'use client';
-
 import React, { useRef, useState } from 'react';
-import { FiMail, FiSend, FiPhone, FiMapPin } from 'react-icons/fi';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
+import { Mail, Send, Phone, MapPin, CheckCircle, Loader2 } from 'lucide-react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../FirebaseConfig';
 
@@ -116,252 +115,185 @@ export default function ContactClient() {
     }
   };
 
+  const [heroRef, heroInView] = useInView({ triggerOnce: true, threshold: 0.1 });
+
+  const inputClass = (hasError) => ({
+    width: '100%',
+    padding: '12px 16px',
+    borderRadius: 12,
+    fontSize: 14,
+    outline: 'none',
+    background: 'var(--bg-secondary)',
+    border: `1px solid ${hasError ? '#EF4444' : 'var(--border-default)'}`,
+    color: 'var(--text-primary)',
+    fontFamily: 'var(--font-inter)',
+    transition: 'border-color 0.2s',
+  });
+
+  const contactItems = [
+    { icon: Mail, label: 'Email', value: 'info@talentwithus.com', href: 'mailto:info@talentwithus.com', color: '#818CF8' },
+    { icon: Phone, label: 'Phone', value: '+91 98765 43210', href: 'tel:+919876543210', color: '#34D399' },
+    { icon: MapPin, label: 'Location', value: 'Bengaluru, Karnataka, India', href: null, color: '#F59E0B' },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white relative overflow-x-hidden">
-      {/* Decorative glow blob */}
-      <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-400/15 blur-3xl rounded-full z-0 pointer-events-none" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 relative z-10">
-        <header className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-[#1EB8F3] via-[#00AEEF] to-[#0059FF] bg-clip-text text-transparent mb-5 tracking-tight flex items-center justify-center gap-3">
-            <span>Connect with Talent With Us</span>
-          </h1>
-          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
-            Got a project, idea, or just want to say hello? <br className="hidden md:block" />
-            We would love to hear from you. Reach out and let us create something remarkable together.
-          </p>
-        </header>
+    <div style={{ background: 'var(--bg-primary)', minHeight: '100vh' }}>
 
-        <main className="grid grid-cols-1 lg:grid-cols-2 gap-14 mb-20">
-          {/* Left - Contact Info */}
-          <section className="flex flex-col gap-10 items-center lg:items-start">
-            <figure className="relative h-72 w-full rounded-3xl overflow-hidden shadow-2xl bg-white">
-              <Image
-                src="/assets/contact.jpg"
-                alt="Contact Us"
-                fill
-                className="object-cover scale-105"
-                priority
-              />
-              <figcaption className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-800/30 to-[#1a1a1a]/70" />
-            </figure>
-
-            <div className="bg-white/90 p-8 rounded-3xl shadow-lg w-full">
-              <h2 className="text-2xl font-bold text-cyan-700 mb-6 flex items-center gap-2">
-                <FiMail /> Contact Information
-              </h2>
-              <ul className="space-y-6">
-                <li className="flex items-center gap-4">
-                  <div className="bg-cyan-500/10 p-3 rounded-xl hover:bg-cyan-100 transition">
-                    <FiMail className="text-cyan-400 text-2xl" />
-                  </div>
-                  <div>
-                    <div className="text-gray-500 text-xs uppercase font-semibold">
-                      Email
-                    </div>
-                    <a
-                      href="mailto:contact@talentwithus.com"
-                      className="text-cyan-800 text-lg font-semibold hover:underline hover:text-cyan-500 transition"
-                    >
-                      contact@talentwithus.com
-                    </a>
-                  </div>
-                </li>
-                <li className="flex items-center gap-4">
-                  <div className="bg-[#f472b6]/10 p-3 rounded-xl hover:bg-[#f472b6]/20 transition">
-                    <FiPhone className="text-fuchsia-400 text-2xl" />
-                  </div>
-                  <div>
-                    <div className="text-gray-500 text-xs uppercase font-semibold">
-                      Phone
-                    </div>
-                    <a
-                      href="tel:+919876543210"
-                      className="text-fuchsia-700 text-lg font-semibold hover:underline hover:text-cyan-500 transition"
-                    >
-                      +91 98765 43210
-                    </a>
-                  </div>
-                </li>
-                <li className="flex items-center gap-4">
-                  <div className="bg-blue-500/10 p-3 rounded-xl hover:bg-blue-200/20 transition">
-                    <FiMapPin className="text-blue-400 text-2xl" />
-                  </div>
-                  <div>
-                    <div className="text-gray-500 text-xs uppercase font-semibold">
-                      Address
-                    </div>
-                    <address className="not-italic text-blue-800 text-lg font-semibold">
-                      Tirupati, Andhra Pradesh, India
-                    </address>
-                  </div>
-                </li>
-              </ul>
+      {/* Hero */}
+      <section className="relative h-[62vh] min-h-[420px] flex items-center overflow-hidden">
+        <div className="absolute inset-0 scale-110">
+          <Image
+            src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1600&q=85&fit=crop"
+            alt="Contact TalentWithUs"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(3,3,8,0.88) 0%, rgba(7,7,15,0.72) 55%, rgba(3,3,8,0.92) 100%)' }} />
+        </div>
+        <div className="absolute inset-0 grid-pattern opacity-15 pointer-events-none" />
+        <div ref={heroRef} className="relative z-10 max-w-[800px] mx-auto px-5 sm:px-6 text-center w-full">
+          <motion.div initial={{ opacity: 0, y: 32 }} animate={heroInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
+            <div className="badge badge-indigo mb-5 mx-auto inline-flex">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse inline-block" />
+              Get in Touch
             </div>
-          </section>
+            <h1 className="text-[clamp(28px,5vw,58px)] font-extrabold leading-[1.08] mb-5 text-white">
+              Let's Build Something <span className="gradient-text">Remarkable</span>
+            </h1>
+            <p className="text-[16px] leading-relaxed max-w-[520px] mx-auto text-white/70">
+              Got a project, idea, or just want to say hello? We'd love to hear from you.
+            </p>
+          </motion.div>
+        </div>
+        <div className="absolute bottom-0 inset-x-0 h-20" style={{ background: 'linear-gradient(to top, var(--bg-primary), transparent)' }} />
+      </section>
 
-          {/* Right - Form */}
-          <section className="bg-white/90 p-10 rounded-3xl shadow-xl h-fit sticky top-8">
-            <h2 className="text-2xl text-[#1EB8F3] font-black mb-6 flex items-center gap-2">
-              <FiSend /> Send Us a Message
+      {/* Body */}
+      <div className="max-w-[1280px] mx-auto px-5 sm:px-6 py-14 grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-10 xl:gap-16">
+
+        {/* Form */}
+        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}>
+          <div className="rounded-[24px] p-7 sm:p-10" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+            <h2 className="text-[20px] font-bold mb-6 flex items-center gap-2"
+              style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}>
+              <Send size={18} style={{ color: '#818CF8' }} /> Send Us a Message
             </h2>
 
             {sent ? (
-              <div className="text-green-600 font-bold text-lg py-6 text-center bg-green-50 rounded-lg border border-green-200">
-                ✅ Thank you for reaching out! We'll get back to you within 24 hours.
+              <div className="py-10 text-center">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(52,211,153,0.12)' }}>
+                  <CheckCircle size={28} style={{ color: '#34D399' }} />
+                </div>
+                <h3 className="text-[18px] font-bold mb-2" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}>Message sent!</h3>
+                <p className="text-[14px]" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-inter)' }}>
+                  We'll get back to you within 24 hours.
+                </p>
               </div>
             ) : (
-              <form
-                ref={formRef}
-                className="space-y-6"
-                onSubmit={handleSubmit}
-                noValidate
-              >
-                {/* Honeypot field - hidden from users */}
-                <input
-                  type="text"
-                  name="company"
-                  className="hidden"
-                  value={form.company}
-                  onChange={handleChange}
-                  tabIndex="-1"
-                  autoComplete="off"
-                />
-                
-                <div>
-                  <label
-                    htmlFor="name"
-                    className="block text-gray-700 text-sm font-medium mb-2"
-                  >
-                    Full Name <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    className={`w-full px-4 py-3 bg-slate-50 rounded-lg text-gray-900 border ${
-                      fieldErrors.name ? 'border-red-300 focus:ring-2 focus:ring-red-300' : 'border-slate-200 focus:ring-2 focus:ring-[#1EB8F3]'
-                    }`}
-                    placeholder="Enter your full name"
-                    onChange={handleChange}
-                    value={form.name}
-                    required
-                  />
-                  {fieldErrors.name && (
-                    <p className="text-red-500 text-sm mt-1">{fieldErrors.name}</p>
-                  )}
+              <form ref={formRef} onSubmit={handleSubmit} noValidate className="space-y-5">
+                {/* honeypot */}
+                <input type="text" name="company" className="hidden" value={form.company} onChange={handleChange} tabIndex="-1" autoComplete="off" />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div>
+                    <label htmlFor="name" className="block text-[13px] font-medium mb-1.5" style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-inter)' }}>
+                      Full Name <span style={{ color: '#EF4444' }}>*</span>
+                    </label>
+                    <input id="name" name="name" type="text" placeholder="John Smith" value={form.name} onChange={handleChange} required
+                      style={inputClass(fieldErrors.name)}
+                      onFocus={e => { if (!fieldErrors.name) e.currentTarget.style.borderColor = 'rgba(99,102,241,0.50)'; }}
+                      onBlur={e => { if (!fieldErrors.name) e.currentTarget.style.borderColor = 'var(--border-default)'; }} />
+                    {fieldErrors.name && <p className="text-[12px] mt-1" style={{ color: '#EF4444', fontFamily: 'var(--font-inter)' }}>{fieldErrors.name}</p>}
+                  </div>
+                  <div>
+                    <label htmlFor="email" className="block text-[13px] font-medium mb-1.5" style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-inter)' }}>
+                      Email Address <span style={{ color: '#EF4444' }}>*</span>
+                    </label>
+                    <input id="email" name="email" type="email" placeholder="john@company.com" value={form.email} onChange={handleChange} required
+                      style={inputClass(fieldErrors.email)}
+                      onFocus={e => { if (!fieldErrors.email) e.currentTarget.style.borderColor = 'rgba(99,102,241,0.50)'; }}
+                      onBlur={e => { if (!fieldErrors.email) e.currentTarget.style.borderColor = 'var(--border-default)'; }} />
+                    {fieldErrors.email && <p className="text-[12px] mt-1" style={{ color: '#EF4444', fontFamily: 'var(--font-inter)' }}>{fieldErrors.email}</p>}
+                  </div>
                 </div>
-                
+
                 <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-gray-700 text-sm font-medium mb-2"
-                  >
-                    Email Address <span className="text-red-400">*</span>
+                  <label htmlFor="subject" className="block text-[13px] font-medium mb-1.5" style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-inter)' }}>
+                    Subject <span style={{ color: '#EF4444' }}>*</span>
                   </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    className={`w-full px-4 py-3 bg-slate-50 rounded-lg text-gray-900 border ${
-                      fieldErrors.email ? 'border-red-300 focus:ring-2 focus:ring-red-300' : 'border-slate-200 focus:ring-2 focus:ring-[#1EB8F3]'
-                    }`}
-                    placeholder="Enter your email address"
-                    onChange={handleChange}
-                    value={form.email}
-                    required
-                  />
-                  {fieldErrors.email && (
-                    <p className="text-red-500 text-sm mt-1">{fieldErrors.email}</p>
-                  )}
+                  <input id="subject" name="subject" type="text" placeholder="What's this about?" value={form.subject} onChange={handleChange} required
+                    style={inputClass(fieldErrors.subject)}
+                    onFocus={e => { if (!fieldErrors.subject) e.currentTarget.style.borderColor = 'rgba(99,102,241,0.50)'; }}
+                    onBlur={e => { if (!fieldErrors.subject) e.currentTarget.style.borderColor = 'var(--border-default)'; }} />
+                  {fieldErrors.subject && <p className="text-[12px] mt-1" style={{ color: '#EF4444', fontFamily: 'var(--font-inter)' }}>{fieldErrors.subject}</p>}
                 </div>
-                
+
                 <div>
-                  <label
-                    htmlFor="subject"
-                    className="block text-gray-700 text-sm font-medium mb-2"
-                  >
-                    Subject <span className="text-red-400">*</span>
+                  <label htmlFor="message" className="block text-[13px] font-medium mb-1.5" style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-inter)' }}>
+                    Message <span style={{ color: '#EF4444' }}>*</span>
                   </label>
-                  <input
-                    id="subject"
-                    name="subject"
-                    type="text"
-                    className={`w-full px-4 py-3 bg-slate-50 rounded-lg text-gray-900 border ${
-                      fieldErrors.subject ? 'border-red-300 focus:ring-2 focus:ring-red-300' : 'border-slate-200 focus:ring-2 focus:ring-[#1EB8F3]'
-                    }`}
-                    placeholder="What's this about?"
-                    onChange={handleChange}
-                    value={form.subject}
-                    required
-                  />
-                  {fieldErrors.subject && (
-                    <p className="text-red-500 text-sm mt-1">{fieldErrors.subject}</p>
-                  )}
+                  <textarea id="message" name="message" rows={5} placeholder="Tell us about your project, requirements, or questions…" value={form.message} onChange={handleChange} required
+                    style={{ ...inputClass(fieldErrors.message), resize: 'none' }}
+                    onFocus={e => { if (!fieldErrors.message) e.currentTarget.style.borderColor = 'rgba(99,102,241,0.50)'; }}
+                    onBlur={e => { if (!fieldErrors.message) e.currentTarget.style.borderColor = 'var(--border-default)'; }} />
+                  {fieldErrors.message && <p className="text-[12px] mt-1" style={{ color: '#EF4444', fontFamily: 'var(--font-inter)' }}>{fieldErrors.message}</p>}
                 </div>
-                
-                <div>
-                  <label
-                    htmlFor="message"
-                    className="block text-gray-700 text-sm font-medium mb-2"
-                  >
-                    Your Message <span className="text-red-400">*</span>
-                  </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    rows={5}
-                    className={`w-full px-4 py-3 bg-slate-50 rounded-lg text-gray-900 border ${
-                      fieldErrors.message ? 'border-red-300 focus:ring-2 focus:ring-red-300' : 'border-slate-200 focus:ring-2 focus:ring-[#1EB8F3]'
-                    }`}
-                    placeholder="Tell us about your project, requirements, or any questions you have..."
-                    onChange={handleChange}
-                    value={form.message}
-                    required
-                  />
-                  {fieldErrors.message && (
-                    <p className="text-red-500 text-sm mt-1">{fieldErrors.message}</p>
-                  )}
-                </div>
-                
+
                 {error && (
-                  <div className="text-red-500 font-medium text-sm bg-red-50 p-3 rounded-lg border border-red-200">
+                  <div className="text-[13px] px-4 py-3 rounded-xl" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.20)', color: '#FCA5A5', fontFamily: 'var(--font-inter)' }}>
                     {error}
                   </div>
                 )}
-                
-                <button
-                  type="submit"
-                  disabled={sending}
-                  className={`w-full flex items-center justify-center px-6 py-3 bg-gradient-to-r from-[#1EB8F3] to-[#0052CC] text-white cursor-pointer font-bold rounded-lg hover:from-[#0052CC] hover:to-[#1EB8F3] transition-all text-lg shadow-xl ${
-                    sending ? 'opacity-70 cursor-not-allowed' : ''
-                  }`}
-                >
-                  {sending ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      Send Message <FiSend className="ml-3" />
-                    </>
-                  )}
+
+                <button type="submit" disabled={sending}
+                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-[14.5px] font-semibold text-white disabled:opacity-60 transition-all"
+                  style={{ background: 'linear-gradient(135deg,#6366F1,#4F46E5)' }}>
+                  {sending ? <><Loader2 size={15} className="animate-spin" /> Sending…</> : <><Send size={14} /> Send Message</>}
                 </button>
               </form>
             )}
-          </section>
-        </main>
-        <section className="text-center mt-20">
-          <p className="text-gray-600 text-lg">
-            Prefer email? Reach us directly at{' '}
-            <a
-              href="mailto:contact@talentwithus.com"
-              className="text-cyan-700 font-semibold underline hover:text-fuchsia-500"
-            >
-              contact@talentwithus.com
-            </a>
-          </p>
-        </section>
+          </div>
+        </motion.div>
+
+        {/* Contact info sidebar */}
+        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          className="space-y-5">
+          <div className="rounded-[24px] p-7" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+            <h2 className="text-[17px] font-bold mb-6 flex items-center gap-2"
+              style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}>
+              <Mail size={16} style={{ color: '#818CF8' }} /> Contact Info
+            </h2>
+            <ul className="space-y-5">
+              {contactItems.map(({ icon: Icon, label, value, href, color }) => (
+                <li key={label} className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${color}15` }}>
+                    <Icon size={17} style={{ color }} />
+                  </div>
+                  <div>
+                    <div className="text-[11px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-inter)' }}>{label}</div>
+                    {href ? (
+                      <a href={href} className="text-[14px] font-medium transition-colors" style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-inter)' }}
+                        onMouseEnter={e => { e.currentTarget.style.color = color; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-secondary)'; }}>
+                        {value}
+                      </a>
+                    ) : (
+                      <span className="text-[14px] font-medium" style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-inter)' }}>{value}</span>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="rounded-[24px] p-7" style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(79,70,229,0.08))', border: '1px solid rgba(99,102,241,0.20)' }}>
+            <h3 className="text-[15px] font-bold mb-2" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}>Response Time</h3>
+            <p className="text-[13.5px] leading-relaxed" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-inter)' }}>
+              We typically respond within <span className="font-semibold text-indigo-400">24 hours</span> on business days. For urgent matters, email us directly.
+            </p>
+          </div>
+        </motion.div>
       </div>
     </div>
   );
